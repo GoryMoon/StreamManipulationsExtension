@@ -60,18 +60,22 @@
     "viewerSummary": "Allows viewers to send bits to trigger events in Space Engineers",
     "viewerUrl": "",
     "viewerUrls": {
+      "mobile": "http://localhost:8081/mobile.html",
       "component": "http://localhost:8081/component.html"
     },
     "views": {
+      "mobile": {
+        "viewerUrl": "http://localhost:8081/mobile.html"
+      },
       "component": {
         "viewerUrl": "http://localhost:8081/component.html",
         "aspectWidth": 0,
         "aspectHeight": 0,
-        "aspectRatioX": 300,
-        "aspectRatioY": 400,
+        "aspectRatioX": 500,
+        "aspectRatioY": 700,
         "autoscale": true,
         "scalePixels": 350,
-        "targetHeight": 6000,
+        "targetHeight": 7000,
         "size": 0,
         "zoom": false,
         "zoomPixels": 0,

@@ -21,9 +21,13 @@ import store from '@/stores/store';
 import '../../assets/config.scss';
 
 Vue.config.productionTip = false;
+let URL;
 
 if (process.env.NODE_ENV === 'development') {
   devtools.connect('http://localhost', 8098);
+  URL = 'http://localhost:3000/v1/';
+} else {
+  URL = 'https://seapi.gorymoon.se/v1/';
 }
 
 library.add(faExternalLinkAlt, faEyeSlash, faEye, faChevronDown, faChevronUp, faCheck);
@@ -31,7 +35,7 @@ Vue.component('fa', FontAwesomeIcon);
 
 Vue.use(BootstrapVue);
 Vue.use(VueAxios, axios.create({
-  baseURL: 'http://localhost:3000/v1/',
+  baseURL: URL,
   headers: { 'Access-Control-Allow-Origin': '*' },
 }));
 Vue.use(VueClipboard);
