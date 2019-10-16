@@ -1,0 +1,126 @@
+{
+    "game": "spaceengineers",
+    "data": [
+        {
+            "action": "meteors",
+            "title": "Meteor storm",
+            "description": "Spawn meteor storms around the player",
+            "message": true,
+            "settings": [
+                {
+                    "title": "Radius",
+                    "description": "The distance around the player to spawn a meteor storm, 1 is vanilla",
+                    "key": "radius",
+                    "type": "number",
+                    "default": 1
+                },
+                {
+                    "title": "Amount",
+                    "description": "The amount of metor storms that will spawn",
+                    "key": "amount",
+                    "type": "number",
+                    "default": 1
+                }
+            ]
+        },
+        {
+            "action": "enable_power",
+            "title": "Enable vehicle power",
+            "description": "Turns the power on in the current vehicle",
+            "message": true
+        },
+        {
+            "action": "disable_power",
+            "title": "Disable vehicle power",
+            "description": "Toggles the power off in the current vehicle",
+            "message": true
+        },
+        {
+            "action": "toggle_power",
+            "title": "Toggle vehicle power",
+            "description": "Toggles the power of the current vehicle",
+            "message": true
+        },
+        {
+            "action": "refill",
+            "title": "Refill player",
+            "description": "Refills health, O2, H2 and energy on the player",
+            "message": true
+        },
+        {
+            "action": "power_up",
+            "title": "Power up",
+            "description": "Refills the batteries in the current vehicle",
+            "message": true
+        },
+        {
+            "action": "power_down",
+            "title": "Power down",
+            "description": "Empties the batteries in the current vehicle",
+            "message": true,
+            "settings": [
+                {
+                    "title": "Amount",
+                    "description": "The amount to remove from the vehicle in MWh",
+                    "key": "amount",
+                    "type": "options",
+                    "default": -1,
+                    "options": [
+                        {
+                            "type": "fixed",
+                            "title": "All",
+                            "value": -1
+                        },
+                        {
+                            "type": "number",
+                            "title": "Custom",
+                            "value": 1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "action": "enable_dampeners",
+            "title": "Enable dampeners",
+            "description": "Enables the dampeners of either vehicle or player",
+            "message": true
+        },
+        {
+            "action": "disable_dampeners",
+            "title": "Disable dampeners",
+            "description": "Disables the dampeners of either vehicle or player",
+            "message": true
+        },
+        {
+            "action": "toggle_dampeners",
+            "title": "Toggle dampeners",
+            "description": "Toggles the dampeners of either vehicle or player",
+            "message": true
+        },
+        {
+            "action": "toggle_thrusters",
+            "title": "Toggle thrusters",
+            "description": "Toggles the thrusters of either vehicle or player",
+            "message": true
+        },
+        {
+            "action": "toggle_thrusters",
+            "title": "Toggle thrusters",
+            "description": "Enables the thrusters of either vehicle or player",
+            "message": true
+        },
+        {
+            "action": "toggle_thrusters",
+            "title": "Toggle thrusters",
+            "description": "Disables the thrusters of either vehicle or player",
+            "message": true
+        },
+        {
+            "action": "fulfill_buildplanner",
+            "title": "Fulfill buildplanner",
+            "description": "Gives the player all items that fit from the current build planner",
+            "message": true
+        }
+    ]
+}

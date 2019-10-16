@@ -1,0 +1,94 @@
+{
+  "allowHttpBackend": false,
+  "backendCommand": "yarn run watch",
+  "backendFolderName": "backend",
+  "certificateExceptions": [],
+  "extensionViews": [
+    {
+      "id": "2",
+      "label": "",
+      "channelId": "25148021",
+      "configurationAnchor": "component",
+      "displayChannelName": "monstercat",
+      "type": "config",
+      "features": {
+        "isBitsEnabled": true,
+        "isChatEnabled": false,
+        "isSubscriptionStatusAvailable": false
+      },
+      "linked": true,
+      "linkedUserId": "265737932",
+      "mode": "config",
+      "isPopout": false,
+      "role": "Broadcaster",
+      "orientation": "Portrait",
+      "frameSize": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  ],
+  "manifest": {
+    "anchor": "component",
+    "assetUrls": [],
+    "authorName": "GoryMoon",
+    "bitsEnabled": true,
+    "canInstall": true,
+    "configUrl": "http://localhost:8081/config.html",
+    "configurationLocation": "hosted",
+    "description": "",
+    "eulaTosUrl": "",
+    "hasChatSupport": false,
+    "iconUrl": "",
+    "iconUrls": {},
+    "id": "fk8z6ixu2azx334h30y13zqf6vgaus",
+    "installationCount": -42,
+    "liveConfigUrl": "",
+    "name": "Stream Engineer",
+    "panelHeight": 0,
+    "privacyPolicyUrl": "",
+    "requestIdentityLink": false,
+    "requiredBroadcasterAbilities": [],
+    "screenshotUrls": [],
+    "sku": "",
+    "state": "Testing",
+    "subscriptionsSupportLevel": "none",
+    "summary": "This extension allows the viewers to send bits to trigger events in the streamers game, like meteors and turning the power off",
+    "supportEmail": "contact@gorymoon.se",
+    "vendorCode": "",
+    "version": "0.0.1",
+    "viewerSummary": "Allows viewers to send bits to trigger events in Space Engineers",
+    "viewerUrl": "",
+    "viewerUrls": {
+      "component": "http://localhost:8081/component.html"
+    },
+    "views": {
+      "component": {
+        "viewerUrl": "http://localhost:8081/component.html",
+        "aspectWidth": 0,
+        "aspectHeight": 0,
+        "aspectRatioX": 300,
+        "aspectRatioY": 400,
+        "autoscale": true,
+        "scalePixels": 350,
+        "targetHeight": 6000,
+        "size": 0,
+        "zoom": false,
+        "zoomPixels": 0,
+        "canLinkExternalContent": false
+      },
+      "config": {
+        "viewerUrl": "http://localhost:8081/config.html",
+        "canLinkExternalContent": true
+      }
+    },
+    "whitelistedConfigUrls": [
+      "https://github.com/GoryMoon/StreamEngineer/releases"
+    ],
+    "whitelistedPanelUrls": []
+  },
+  "frontendCommand": "yarn serve",
+  "frontendFolderName": "C:\\Users\\Gustaf\\Desktop\\SE\\twitch-extension-boilerplate-master\\frontend",
+  "name": "Stream Engineer",
+  "version": 1
+}
