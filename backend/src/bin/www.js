@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
 import 'dotenv/config'
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+
 import app from '../app'
 import debugLib from 'debug'
 import http from 'http'
