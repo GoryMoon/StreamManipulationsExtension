@@ -3,19 +3,17 @@
     <b-container v-if="isLoaded && !maintenance">
       <h1 class="mt-3">StreamEngineer Config</h1>
       <hr>
-      <div v-if="$twitchExtension.features.isBitsEnabled">
-        <p>
-          This extension requires the
-          <a href="https://github.com/GoryMoon/StreamEngineer/releases">StreamEngineer <fa icon="external-link-alt"></fa></a>
-          plugin for SpaceEngineers to be installed on the client.
-        </p>
-        <p>Instruction on how to install it can be found in the download or on the github page.</p>
-        <ConfigToken></ConfigToken>
-        <ConfigActions></ConfigActions>
-      </div>
-      <div v-else>
+      <div v-if="!$twitchExtension.features.isBitsEnabled">
         <b-alert variant="danger" show>This extension requires bits to work</b-alert>
       </div>
+      <p>
+        This extension requires the
+        <a target="_blank" href="https://github.com/GoryMoon/StreamEngineer/releases">StreamEngineer <fa icon="external-link-alt"></fa></a>
+        plugin for SpaceEngineers to be installed on the client.
+      </p>
+      <p>Instruction on how to install it can be found in the download or on the github page.</p>
+      <ConfigToken></ConfigToken>
+      <ConfigActions></ConfigActions>
     </b-container>
     <div v-else-if="maintenance" class="text-center pt-5">
         <h3>Server down for maintenance</h3>

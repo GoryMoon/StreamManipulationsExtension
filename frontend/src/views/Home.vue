@@ -60,9 +60,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
-// import HelloWorld from '@/components/HelloWorld.vue';
-
 export default {
   name: 'home',
   data() {
@@ -104,7 +101,7 @@ export default {
       this.loadingBitsModal = true;
     },
     transactionComplete(data) {
-      if (data.initiator === 'current_user') {
+      if (data.initiator === 'current_user' && this.selectedIndex !== -1) {
         this.loadingBitsModal = false;
         const action = this.actions[this.selectedIndex];
         this.sendingActionModal = true;

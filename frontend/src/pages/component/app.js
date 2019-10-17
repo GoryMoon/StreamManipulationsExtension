@@ -2,7 +2,7 @@ import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
-import devtools from '@vue/devtools';
+// import devtools from '@vue/devtools';
 import OverlayScrollbars from 'overlayscrollbars';
 import { OverlayScrollbarsPlugin } from 'overlayscrollbars-vue';
 import 'overlayscrollbars/css/OverlayScrollbars.css';
@@ -17,7 +17,7 @@ Vue.config.productionTip = false;
 let URL;
 
 if (process.env.NODE_ENV === 'development') {
-  devtools.connect('http://localhost', 8098);
+  // devtools.connect('http://localhost', 8098);
   URL = 'http://localhost:3000/v1/';
 } else {
   URL = 'https://seapi.gorymoon.se/v1/';
