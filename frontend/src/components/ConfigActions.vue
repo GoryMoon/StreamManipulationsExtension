@@ -197,7 +197,11 @@ export default {
   },
   methods: {
     getActionData() {
-      this.axios.get('game/spaceengineers').then((result) => {
+      this.axios.get('game/spaceengineers', {
+        headers: {
+          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
+        },
+      }).then((result) => {
         this.gamedata = result.data.data;
       });
     },
@@ -252,7 +256,12 @@ export default {
     },
     saveActions() {
       this.$twitchExtension.configuration.set('broadcaster', '1.0', JSON.stringify(this.actions));
-      this.axios.post('/actions/spaceengineers', { config: this.actions });
+      this.axios.post('/actions/spaceengineers', { config: this.actions }, {
+        headers: {
+          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
+        },
+      });
+      this.$twitchExtension.send('broadcast', 'application/json', { type: 'config', actions: this.actions });
       this.show_saved = true;
       this.defaultActions = cloneDeep(this.actions);
       setTimeout(() => { this.show_saved = false; }, 1500);

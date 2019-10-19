@@ -5,7 +5,7 @@
   "certificateExceptions": [],
   "extensionViews": [
     {
-      "id": "2",
+      "id": "1",
       "label": "",
       "channelId": "25148021",
       "configurationAnchor": "component",
@@ -36,11 +36,15 @@
     "canInstall": true,
     "configUrl": "http://localhost:8081/config.html",
     "configurationLocation": "hosted",
-    "description": "",
+    "description": "Viewers can use bits to send pre-configured actions to the broadcasters game. \nFor example, this can send meteors onto the broadcasters base, turn off their vehicle when they least expect it, refill their energy in their ship when they are stranded in space.",
     "eulaTosUrl": "",
     "hasChatSupport": false,
-    "iconUrl": "",
-    "iconUrls": {},
+    "iconUrl": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/logo49aa1b97-7f4d-4ce7-8591-8d5b1422629b",
+    "iconUrls": {
+      "100x100": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/logo49aa1b97-7f4d-4ce7-8591-8d5b1422629b",
+      "24x24": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/taskbar88c35958-bb13-48b9-b05c-70918e194fbb",
+      "300x200": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/discovery2dd6e2d8-30d6-4301-be2e-13004eeffae4"
+    },
     "id": "fk8z6ixu2azx334h30y13zqf6vgaus",
     "installationCount": -42,
     "liveConfigUrl": "",
@@ -49,14 +53,19 @@
     "privacyPolicyUrl": "",
     "requestIdentityLink": false,
     "requiredBroadcasterAbilities": [],
-    "screenshotUrls": [],
+    "screenshotUrls": [
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshot4f1a0bae-c86c-4136-9d98-66d0d7f5210f",
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshot07abf34a-53d3-4588-ba0f-1b3c93dadb28",
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshot677572c9-d250-4a90-822e-035066197237",
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshotaac277a1-801b-4b53-a639-01e1a0dd6f02"
+    ],
     "sku": "",
     "state": "Testing",
     "subscriptionsSupportLevel": "none",
-    "summary": "This extension allows the viewers to send bits to trigger events in the streamers game, like meteors and turning the power off",
+    "summary": "This extension allows the viewers to send bits to trigger events in the broadcasters game, like meteors and turning the power off",
     "supportEmail": "contact@gorymoon.se",
     "vendorCode": "",
-    "version": "0.0.1",
+    "version": "1.0.1",
     "viewerSummary": "Allows viewers to send bits to trigger events in Space Engineers",
     "viewerUrl": "",
     "viewerUrls": {

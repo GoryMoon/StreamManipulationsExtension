@@ -54,7 +54,11 @@ export default {
     }, 400, { leading: true, trailing: false }),
     updateToken(path = 'token') {
       const that = this;
-      this.axios.get(path).then((result) => {
+      this.axios.get(path, {
+        headers: {
+          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
+        },
+      }).then((result) => {
         that.token = result.data.token;
       });
     },

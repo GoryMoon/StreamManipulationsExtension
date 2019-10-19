@@ -92,7 +92,13 @@ export default {
     },
     onPubSub: function pubsub(target, contentType, message) {
       const m = JSON.parse(message);
-      this.modActive = m.mod_active;
+      if ('mod_active' in m) {
+        this.modActive = m.mod_active;
+      } else if ('type' in m) {
+        if (m.type === 'config') {
+          this.actions = m.actions;
+        }
+      }
     },
     sendAction(index) {
       this.selectedIndex = index;
@@ -110,6 +116,10 @@ export default {
           user: data.displayName,
           action: action.action,
           settings: action.settings,
+        }, {
+          headers: {
+            authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
+          },
         }).then(() => {
           this.sendingActionModal = false;
         }).catch((err) => {

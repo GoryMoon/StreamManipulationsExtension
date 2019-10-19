@@ -47,7 +47,6 @@ export default {
   beforeUpdate() {
     if (this.isLoaded && !this.loaded) {
       this.loaded = true;
-      this.axios.defaults.headers.authorization = `Bearer ${this.$twitchExtension.viewer.sessionToken}`;
       const data = this.$twitchExtension.configuration.global.content;
       this.maintenance = data !== undefined ? JSON.parse(data).maintenance : false;
     }
