@@ -161,6 +161,7 @@
 import { required } from 'vuelidate/lib/validators';
 import isEqual from 'lodash.isequal';
 import cloneDeep from 'lodash.clonedeep';
+import debounce from 'lodash.debounce';
 
 export default {
   name: 'ConfigActions',
@@ -254,7 +255,7 @@ export default {
         this.$refs.add_action_modal.hide();
       });
     },
-    saveActions() {
+    saveActions: debounce(function request() {
       this.$twitchExtension.configuration.set('broadcaster', '1.0', JSON.stringify(this.actions));
       this.axios.post('/actions/spaceengineers', { config: this.actions }, {
         headers: {
@@ -265,7 +266,7 @@ export default {
       this.show_saved = true;
       this.defaultActions = cloneDeep(this.actions);
       setTimeout(() => { this.show_saved = false; }, 1500);
-    },
+    }, 400, { leading: true, trailing: false }),
     getPrice(sku) {
       const product = this.bitProducts.find(p => p.sku === sku);
       return (product && product.cost.amount) || 0;
