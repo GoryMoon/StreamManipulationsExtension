@@ -135,7 +135,7 @@ router.post('/action/:game', async (req, res, next) => {
     let bitPayload;
     try {
         bitPayload = new TwitchEbsTools(process.env.TWITCH_SECRET).validateToken(token)
-        if (!TwitchEbsTools.verifyTokenNotExpired(req.jwt)) {
+        if (!TwitchEbsTools.verifyTokenNotExpired(bitPayload)) {
             return res.status(401).json({status: 'bits_not_valid'})
         }
     } catch(err) {
