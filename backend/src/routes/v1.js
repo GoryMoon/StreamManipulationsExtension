@@ -22,10 +22,12 @@ router.use((req, res, next) => {
                 return res.status(401).send()
             } else {
                 req.auth = authorization[1]
-                req.jwt = new TwitchEbsTools(process.env.TWITCH_SECRET).validateToken(req.auth)
+                //TODO Until twitch review to let tokens through
+                req.jwt = jwt.verify(token, Buffer.from(process.env.TWITCH_SECRET, 'base64'), { ignoreExpiration: true });
+                /*req.jwt = new TwitchEbsTools().validateToken(req.auth)
                 if (!TwitchEbsTools.verifyTokenNotExpired(req.jwt)) {
                     return res.status(401).send()
-                }
+                }*/
                 return next()
             }
         } catch (err) {
