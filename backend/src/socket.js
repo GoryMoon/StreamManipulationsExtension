@@ -15,7 +15,7 @@ export default function (server) {
     var io = IO(server)
     io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }))
 
-    io.use((socket, next) => {
+    io.of('/v1').use((socket, next) => {
         const token = socket.handshake.query.token;
         if (token == undefined) {
             return next(new Error('Authentication error'))
@@ -38,7 +38,7 @@ export default function (server) {
         }
     });
 
-    io.on('connection', (socket) => {
+    io.of('/v1').on('connection', (socket) => {
         const data = socket.jwt
         User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true }).then((res, err) => {
             if (err === undefined) {
@@ -94,7 +94,7 @@ export default function (server) {
     }
 
     function sendConfig(channel_id, content, segment) {
-        if (isInCooldown(channel_id !== null ? `${channel_id}-${segment}`: segment)) {
+        if (isInConfigCooldown(channel_id !== null ? `${channel_id}-${segment}`: segment)) {
             console.log(`Service is in cooldown: ${channel_id}-${segment}`)
             return;
         }

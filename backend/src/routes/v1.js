@@ -127,7 +127,6 @@ router.post('/actions/:game', (req, res, next) => {
         })
 })
 
-
 //Action sent
 router.post('/action/:game', async (req, res, next) => {
     const token = req.body.token;
@@ -163,7 +162,7 @@ router.post('/action/:game', async (req, res, next) => {
         
         User.findOne({ channel_id: req.jwt.channel_id }).then(result => {
             if (result != undefined && result.socket_id != null) {
-                io.to(result.socket_id).emit('action', {
+                io.of('/v1').to(result.socket_id).emit('action', {
                     bits: bitPayload.data.product.cost.amount,
                     user: req.body.user,
                     action: action.action,
