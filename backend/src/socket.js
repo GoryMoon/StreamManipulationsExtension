@@ -94,7 +94,7 @@ export default function (server) {
     }
 
     function sendConfig(channel_id, content, segment) {
-        if (isInConfigCooldown(channel_id !== null ? `${channel_id}-${segment}`: segment)) {
+        if (isInCooldown(channel_id !== null ? `${channel_id}-${segment}`: segment)) {
             console.log(`Service is in cooldown: ${channel_id}-${segment}`)
             return;
         }
@@ -133,14 +133,4 @@ export default function (server) {
         inCooldown[channel_id] = moment().add(1, 's')
         return false;
     }
-
-    function isInConfigCooldown(id) {
-        if (inCooldown[id] != undefined && inCooldown[id].isAfter()) {
-            return true;
-        }
-
-        inCooldown[id] = moment().add(3, 's')
-        return false;
-    }
-    
 }
