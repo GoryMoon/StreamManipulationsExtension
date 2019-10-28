@@ -2,9 +2,13 @@ import IO from 'socket.io'
 import redisAdapter from "socket.io-redis";
 import jwt from "jsonwebtoken";
 import axios from 'axios';
+import moment from 'moment';
+import pick from 'lodash.pick'
 
 import User from "./models/user.model";
-import moment from 'moment';
+import Action from "./models/action.model";
+import events from './events';
+
 
 let inCooldown = {}
 
@@ -15,7 +19,7 @@ export default function (server) {
     var io = IO(server)
     io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }))
 
-    io.of('/v1').use((socket, next) => {
+    const middleware = (socket, next) => {
         const token = socket.handshake.query.token;
         if (token == undefined) {
             return next(new Error('Authentication error'))
@@ -36,25 +40,87 @@ export default function (server) {
                 }
             })
         }
-    });
+    };
 
-    io.of('/v1').on('connection', (socket) => {
+    var dash = io.of('/dashboard');
+    dash.use(middleware)
+    dash.on('connection', (socket) => {
+        const data = socket.jwt
+        sendActions(socket, data.channel_id, 0)
+
+        User.findOne({ channel_id: data.channel_id }).then((result, err) => {
+            socket.emit('update_game_connection', result.socket_id !== null)
+        })
+
+        const actionListener = (action) => {
+            socket.emit('action', pick(action, [ '_id', 'action', 'bits', 'sender', 'game', 'createdAt' ]))
+        }
+        const connectionListener = (value) => {
+            socket.emit('update_game_connection', value)
+        }
+        events.on('action-' + data.channel_id, actionListener)
+        events.on('connection-' + data.channel_id, connectionListener)
+
+        socket.on('more-actions', (offset) => {
+            sendActions(socket, data.channel_id, offset)
+        })
+
+        socket.on('replay', (id) => {
+            Action.findById(id).then((result, err) => {
+                events.emit('replay-' + result.channel_id, result)
+            })
+        })
+
+        socket.on('disconnect', () => {
+            events.removeListener('action-' + data.channel_id, actionListener)
+            events.removeListener('connection-' + data.channel_id, connectionListener)
+            console.log("Dashboard: " + socket.id + " disconnected")
+        })
+    })
+
+    function sendActions(socket, channel_id, offset) {
+        Action.find({ channel_id: channel_id },
+            [ '_id', 'action', 'bits', 'sender', 'game', 'createdAt' ],
+            { limit: 50, sort: { createdAt: -1 }, skip: offset }).then((result, err) => {
+            if (result !== undefined) {
+                socket.emit('connect_actions', result)
+            }
+        })
+    }
+
+
+    var v1 = io.of('/v1');
+    v1.use(middleware)
+    v1.on('connection', (socket) => {
         const data = socket.jwt
         User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true }).then((res, err) => {
             if (err === undefined) {
-                sendPubSub(data.channel_id, {
+                events.emit('connection-' + data.channel_id, true)
+                /*sendPubSub(data.channel_id, {
                     mod_active: true
                 })
-                sendConfig(data.channel_id, { mod_active: true }, 'developer')
+                sendConfig(data.channel_id, { mod_active: true }, 'developer')*/
             }
         })
+
+        const replayListener = (action) => {
+            socket.emit('action', {
+                bits: action.bits,
+                user: action.sender,
+                action: action.action,
+                settings: action.config
+            })
+        }
+        events.on('replay-' + data.channel_id, replayListener)
         
         socket.on('disconnect', () => {
             User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null }).then((res, err) => {
-                sendPubSub(data.channel_id, {
+                events.emit('connection-' + data.channel_id, false)
+                events.removeListener('replay-' + data.channel_id, replayListener)
+                /*sendPubSub(data.channel_id, {
                     mod_active: false
                 })
-                sendConfig(data.channel_id, { mod_active: false }, 'developer')
+                sendConfig(data.channel_id, { mod_active: false }, 'developer')*/
             })
         })
     })
@@ -133,4 +199,5 @@ export default function (server) {
         inCooldown[channel_id] = moment().add(1, 's')
         return false;
     }
+    return io
 }

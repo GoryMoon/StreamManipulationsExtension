@@ -1,0 +1,46 @@
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Home from '../views/Home.vue'
+import store from '../store'
+
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: Home,
+    meta: {
+      title: 'Stream Engineer - Dashboard',
+      auth: false
+    }
+  },
+  {
+    path: '/actions',
+    name: 'actions',
+    component: () => import('../views/Actions.vue'),
+    meta: {
+      title: 'Stream Engineer - Actions',
+      auth: true
+    }
+  }
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(r => r.meta.auth)) {
+    if (!store.getters.hasUser) {
+      next('/')
+      return
+    }
+  }
+  document.title = to.meta.title || 'Stream Engineer'
+  next()
+})
+
+export default router

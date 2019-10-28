@@ -105,3 +105,4 @@ yarn-error.log
 # End of https://www.gitignore.io/api/node,vuejs
 
 /backend/conf
+users.htpasswd

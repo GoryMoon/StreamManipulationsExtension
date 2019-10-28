@@ -10,6 +10,8 @@ import User from "../models/user.model"
 import Config from "../models/config.model";
 import Game from "../models/game.model";
 import Stat from "../models/stat.model";
+import Action from "../models/action.model";
+import events from '../events';
 
 var router = express.Router();
 const SECRET = Buffer.from(process.env.SECRET, 'base64').toString()
@@ -19,15 +21,13 @@ router.use((req, res, next) => {
         try {
             let authorization = req.headers['authorization'].split(' ')
             if (authorization[0] !== 'Bearer') {
-                return res.status(401).send()
+                return res.status(401).send('invalid_token')
             } else {
                 req.auth = authorization[1]
-                //TODO Until twitch review to let tokens through
-                req.jwt = jwt.verify(req.auth, Buffer.from(process.env.TWITCH_SECRET, 'base64'), { ignoreExpiration: true });
-                /*req.jwt = new TwitchEbsTools(process.env.TWITCH_SECRET).validateToken(req.auth)
+                req.jwt = new TwitchEbsTools(process.env.TWITCH_SECRET).validateToken(req.auth)
                 if (!TwitchEbsTools.verifyTokenNotExpired(req.jwt)) {
-                    return res.status(401).send()
-                }*/
+                    return res.status(401).send('expired')
+                }
                 return next()
             }
         } catch (err) {
@@ -35,7 +35,7 @@ router.use((req, res, next) => {
             return res.status(403).send()
         }
     } else {
-        return res.status(401).send()
+        return res.status(401).send('no_token')
     }
 })
 
@@ -158,6 +158,19 @@ router.post('/action/:game', async (req, res, next) => {
 
         if (!valid) {
             return res.status(401).json({status: 'action_not_valid'})
+        }
+        try {
+            const result = await Action.create({
+                channel_id: req.jwt.channel_id,
+                game: req.params.game,
+                bits: bitPayload.data.product.cost.amount,
+                sender: req.body.user,
+                action: action.action,
+                config: { message: action.message, ...action.settings }
+            })
+            events.emit('action-' + req.jwt.channel_id, result)
+        } catch (error) {
+            console.log("Could not save an action to disk: " + req.body.action + " - " + JSON.stringify(req.body.settings))
         }
         
         User.findOne({ channel_id: req.jwt.channel_id }).then(result => {

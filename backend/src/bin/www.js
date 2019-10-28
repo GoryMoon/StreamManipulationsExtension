@@ -3,6 +3,8 @@
 import 'dotenv/config'
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
+import expressStatusMonitor from 'express-status-monitor'
+import auth from 'http-auth'
 
 import app from '../app'
 import debugLib from 'debug'
@@ -30,7 +32,52 @@ app.set('port', port);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-socket(server);
+const io = socket(server);
+
+const statusMonitor = expressStatusMonitor({
+  title: 'Stream Engineer Status',
+  path: '',
+  websocket: io,
+  healthChecks: [
+      {
+          protocol: 'http',
+          host: 'localhost',
+          port: process.env.PORT,
+          path: '/v1/token/'
+      },
+      {
+          protocol: 'http',
+          host: 'localhost',
+          port: process.env.PORT,
+          path: '/v1/token/create'
+      },
+      {
+          protocol: 'http',
+          host: 'localhost',
+          port: process.env.PORT,
+          path: '/v1/game/spaceengineers/'
+      },
+      {
+          protocol: 'http',
+          host: 'localhost',
+          port: process.env.PORT,
+          path: '/v1/actions/spaceengieers/'
+      },
+      {
+          protocol: 'http',
+          host: 'localhost',
+          port: process.env.PORT,
+          path: '/v1/action/spaceengineers/'
+      }
+  ]
+});
+const basic = auth.basic({
+  realm: 'Stream Engineer Monitor',
+  file: __dirname + '/../../users.htpasswd'
+})
+app.use(statusMonitor.middleware)
+app.get('/status', auth.connect(basic), statusMonitor.pageRoute)
+
 
 /**
  * Normalize a port into a number, string, or false.
