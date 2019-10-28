@@ -96,10 +96,10 @@ export default function (server) {
         User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true }).then((res, err) => {
             if (err === undefined) {
                 events.emit('connection-' + data.channel_id, true)
-                /*sendPubSub(data.channel_id, {
+                sendPubSub(data.channel_id, {
                     mod_active: true
                 })
-                sendConfig(data.channel_id, { mod_active: true }, 'developer')*/
+                sendConfig(data.channel_id, { mod_active: true }, 'developer')
             }
         })
 
@@ -117,10 +117,10 @@ export default function (server) {
             User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null }).then((res, err) => {
                 events.emit('connection-' + data.channel_id, false)
                 events.removeListener('replay-' + data.channel_id, replayListener)
-                /*sendPubSub(data.channel_id, {
+                sendPubSub(data.channel_id, {
                     mod_active: false
                 })
-                sendConfig(data.channel_id, { mod_active: false }, 'developer')*/
+                sendConfig(data.channel_id, { mod_active: false }, 'developer')
             })
         })
     })
