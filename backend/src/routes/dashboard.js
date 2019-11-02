@@ -44,7 +44,7 @@ router.get('/auth', passport.authenticate('twitch.js'))
 router.get('/auth/callback', passport.authenticate('twitch.js', { successRedirect: '/dashboard', failureRedirect: '/dashboard?error=1' }))
 router.get('/logout', (req, res) => {
     req.logout()
-    res.redirect('/dashboard')
+    res.redirect('/dashboard/')
 })
 router.use(history({
     index: '/'

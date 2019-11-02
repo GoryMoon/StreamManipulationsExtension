@@ -175,11 +175,17 @@ router.post('/action/:game', async (req, res, next) => {
         
         User.findOne({ channel_id: req.jwt.channel_id }).then(result => {
             if (result != undefined && result.socket_id != null) {
+                let settings = {}
+                if (action.settings != undefined) {
+                    for (let [key, value] of Object.entries(action.settings)) {
+                        settings[key] = JSON.parse(value)
+                    }
+                }
                 io.of('/v1').to(result.socket_id).emit('action', {
                     bits: bitPayload.data.product.cost.amount,
                     user: req.body.user,
                     action: action.action,
-                    settings: { message: action.message, ...action.settings }
+                    settings: { message: action.message, ...settings }
                 })
                 var incObj = {}
                 incObj['metrics.' + action.action] = 1
