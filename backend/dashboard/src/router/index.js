@@ -16,6 +16,15 @@ const routes = [
     }
   },
   {
+    path: '/replay',
+    name: 'replay',
+    component: () => import('../views/Replay.vue'),
+    meta: {
+      title: 'Stream Engineer - Replay Actions',
+      auth: true
+    }
+  },
+  {
     path: '/actions',
     name: 'actions',
     component: () => import('../views/Actions.vue'),

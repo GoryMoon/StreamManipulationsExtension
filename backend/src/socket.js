@@ -6,6 +6,7 @@ import moment from 'moment';
 import pick from 'lodash.pick'
 
 import User from "./models/user.model";
+import Config from "./models/config.model";
 import Action from "./models/action.model";
 import events from './events';
 
@@ -52,6 +53,10 @@ export default function (server) {
             socket.emit('update_game_connection', result.socket_id !== null)
         })
 
+        Config.findOne({ channel_id: data.channel_id }).then((result, err) => {
+            socket.emit('config', result.config)
+        })
+
         const actionListener = (action) => {
             socket.emit('action', pick(action, [ '_id', 'action', 'bits', 'sender', 'game', 'createdAt' ]))
         }
@@ -67,8 +72,12 @@ export default function (server) {
 
         socket.on('replay', (id) => {
             Action.findById(id).then((result, err) => {
-                events.emit('replay-' + result.channel_id, result)
+                events.emit('run-' + result.channel_id, result)
             })
+        })
+
+        socket.on('run', (action) => {
+            events.emit('run-' + data.channel_id, action)
         })
 
         socket.on('disconnect', () => {
@@ -111,12 +120,12 @@ export default function (server) {
                 settings: action.config
             })
         }
-        events.on('replay-' + data.channel_id, replayListener)
+        events.on('run-' + data.channel_id, replayListener)
         
         socket.on('disconnect', () => {
             User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null }).then((res, err) => {
                 events.emit('connection-' + data.channel_id, false)
-                events.removeListener('replay-' + data.channel_id, replayListener)
+                events.removeListener('run-' + data.channel_id, replayListener)
                 sendPubSub(data.channel_id, {
                     mod_active: false
                 })

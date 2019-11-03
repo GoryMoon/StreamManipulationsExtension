@@ -2,12 +2,20 @@
   <div class="dashboard">
     <h1>Dashboard</h1>
     <hr>
-    <b-card v-if="hasUser" title="Actions" style="max-width: 30rem;">
-      <b-card-text>
-        Here you can monitor and replay actions that users have done from the extension
-      </b-card-text>
-      <b-button to="actions" variant="outline-info">View Actions</b-button>
-    </b-card>
+    <b-card-group v-if="hasUser" deck>
+      <b-card title="Replay Actions" style="max-width: 30rem;">
+        <b-card-text>
+          Here you can monitor and replay actions that users have done from the extension
+        </b-card-text>
+        <b-button to="replay" variant="outline-info">Replay Actions</b-button>
+      </b-card>
+      <b-card title="Actions" style="max-width: 30rem;">
+        <b-card-text>
+          Here you check and test you actions
+        </b-card-text>
+        <b-button to="actions" variant="outline-info">View Actions</b-button>
+      </b-card>
+    </b-card-group>
     <div v-else>
       <p>You need to login to start monitor actions</p>
       <b-button variant="outline-info" href="/dashboard/auth">

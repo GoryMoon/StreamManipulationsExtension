@@ -1,6 +1,6 @@
 <template>
   <div class="actions">
-    <h1>Actions</h1>
+    <h1>Replay Actions</h1>
     <b-button
     variant="outline-info"
     :pressed.sync="animatedIcons">Animated Bits</b-button>
@@ -8,46 +8,55 @@
     <div id="action-list" class="mb-3">
       <transition-group name="action-list">
         <b-card
-        v-for="(action, index) in getActions"
-        :key="index"
+        v-for="action in getActions"
+        :key="action._id"
+        :bg-variant="unwatchedActions.includes(action._id) ? 'secondary': 'default'"
+        @mouseover="removeUnwatched(action._id)"
         class="mb-2 action-list-item">
           <b-row>
             <b-col cols="6" sm="auto" class="mr-sm-auto">
-              <h3>{{ caseType(action.title) }}</h3>
-              <span class="font-weight-bold">{{ action.description }}</span><br>
-              <span class="font-weight-light">Type: </span><span class="font-weight-bold">{{ action.action }}</span>
+              <h3>{{ caseType(action.action) }}</h3>
+              <span class="font-weight-light">By: </span><span class="font-weight-bold">{{ action.sender }}</span>
             </b-col>
-            <b-col cols="6" sm="auto" :class="[getBitColor(cleanSku(action.sku)), 'text-right']">
+            <b-col cols="6" sm="auto" :class="[getBitColor(action.bits), 'text-right']">
               <img
-              :src="getBitImage(cleanSku(action.sku))"
-              :alt="cleanSku(action.sku) + 'bits'"
-              width="40" height="40"> {{ cleanSku(action.sku) }} bits
+              :src="getBitImage(action.bits)"
+              :alt="action.bits + 'bits'"
+              width="40" height="40"> {{ action.bits }} bits
             </b-col>
             <b-col cols="12" sm="auto" class="text-right">
               <b-button
               size="lg"
               variant="outline-success"
               :disabled="!gameConnected"
-              @click="run(index)">
-                Run
+              @click="replay(action._id)">
+                Replay
               </b-button>
             </b-col>
           </b-row>
         </b-card>
       </transition-group>
+      <div class="text-center">
+        <b-button ref="load_more" @click="loadMore" class="mt-2">Load More</b-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import startCase from 'lodash.startcase'
-import { UPDATE_ANIMATED_ICONS } from '@/store/mutation-types'
-import { mapState } from 'vuex'
+import { UPDATE_ANIMATED_ICONS, CLEAR_UNWATCHED } from '@/store/mutation-types'
 
 export default {
-  name: 'actions',
+  name: 'replay',
+  sockets: {
+    connect_actions (actions) {
+      this.$refs['load_more'].disabled = false
+    }
+  },
   data () {
     return {
+      unwatchedActions: [],
       icons: {
         static: {
           gray: require('@/assets/1.png'),
@@ -70,9 +79,6 @@ export default {
     caseType (type) {
       return startCase(type)
     },
-    cleanSku (sku) {
-      return sku.replace('value', '')
-    },
     getBitImage (bits) {
       let icons = this.animatedIcons ? this.icons.animated : this.icons.static
       return (bits < 100 ? icons.gray : bits < 1000 ? icons.purple : bits < 5000 ? icons.green : bits < 10000 ? icons.blue : icons.red)
@@ -80,29 +86,27 @@ export default {
     getBitColor (bits) {
       return 'bits ' + (bits < 100 ? 'bits-10' : bits < 1000 ? 'bits-100' : bits < 5000 ? 'bits-1000' : bits < 10000 ? 'bits-5000' : 'bits-10000')
     },
-    run (id) {
-      let config = this.getActions[id]
-      const action = {
-        bits: this.cleanSku(config.sku),
-        sender: this.user.display_name,
-        action: config.action,
-        config: { message: config.message, ...config.settings }
+    removeUnwatched (id) {
+      if (this.unwatchedActions.includes(id)) {
+        this.unwatchedActions.splice(this.unwatchedActions.indexOf(id), 1)
       }
-      this.$socket.client.emit('run', action)
-      this.$bvToast.toast('Action sent', {
+    },
+    replay (id) {
+      this.$socket.client.emit('replay', id)
+      this.$bvToast.toast('Replay sent', {
         title: 'Action',
         autoHideDelay: 1000,
         variant: 'success'
       })
+    },
+    loadMore () {
+      this.$refs['load_more'].disabled = true
+      this.$store.dispatch('load_more_actions')
     }
   },
   computed: {
-    ...mapState([
-      'user',
-      'gameConnected'
-    ]),
     getActions () {
-      return this.$store.getters.getConfig
+      return this.$store.getters.getActions('spaceengineers')
     },
     animatedIcons: {
       get () {
@@ -111,7 +115,14 @@ export default {
       set (value) {
         this.$store.commit(UPDATE_ANIMATED_ICONS, value)
       }
+    },
+    gameConnected () {
+      return this.$store.state.gameConnected
     }
+  },
+  mounted () {
+    this.unwatchedActions = this.$store.getters.getUnwatchedActions('spaceengineers')
+    this.$store.commit(CLEAR_UNWATCHED)
   }
 }
 </script>

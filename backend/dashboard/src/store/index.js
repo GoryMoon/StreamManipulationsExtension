@@ -6,7 +6,9 @@ import orderBy from 'lodash.orderby'
 import localforage from 'localforage'
 
 import router from '@/router'
-import { ADD_ACTION, ADD_ACTIONS, ADD_UNWATCHED, CLEAR_UNWATCHED, SET_USER, UPDATE_ANIMATED_ICONS, SOCKET_UPDATE_GAME_CONNECTION } from './mutation-types'
+import {
+  ADD_ACTION, ADD_ACTIONS, ADD_UNWATCHED, CLEAR_UNWATCHED, SET_USER,
+  UPDATE_ANIMATED_ICONS, SOCKET_UPDATE_GAME_CONNECTION, SOCKET_CONFIG } from './mutation-types'
 
 Vue.use(Vuex)
 
@@ -23,6 +25,7 @@ export default new Vuex.Store({
   plugins: [vuexStorage.plugin],
   state: {
     user: null,
+    config: [],
     actions: {},
     unwatchedActions: [],
     animatedIcons: true,
@@ -42,6 +45,9 @@ export default new Vuex.Store({
     },
     getUnwatchedActions: (state) => (game) => {
       return state.unwatchedActions
+    },
+    getConfig: (state) => {
+      return state.config
     }
   },
   mutations: {
@@ -67,6 +73,9 @@ export default new Vuex.Store({
     },
     [SOCKET_UPDATE_GAME_CONNECTION] (state, value) {
       state.gameConnected = value
+    },
+    [SOCKET_CONFIG] (state, config) {
+      state.config = config
     },
     RESTORE_MUTATION: vuexStorage.RESTORE_MUTATION
   },

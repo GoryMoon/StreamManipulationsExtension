@@ -2,15 +2,16 @@
   <div>
     <b-navbar type="dark" variant="primary" class="mb-3">
       <b-container>
-        <b-navbar-brand><router-link to="/">Stream Engineer</router-link></b-navbar-brand>
+        <b-navbar-brand to="/">Stream Engineer</b-navbar-brand>
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav v-if="hasUser">
-            <b-nav-item>
-              <router-link to="/actions">
-                Actions <b-badge v-if="getUnwatchedAmount > 0" variant="info">{{ getUnwatchedAmount }}</b-badge>
-              </router-link>
+            <b-nav-item to="replay">
+              Replay Actions <b-badge v-if="getUnwatchedAmount > 0" variant="info">{{ getUnwatchedAmount }}</b-badge>
+            </b-nav-item>
+            <b-nav-item to="actions">
+              Actions <b-badge v-if="getUnwatchedAmount > 0" variant="info">{{ getUnwatchedAmount }}</b-badge>
             </b-nav-item>
           </b-navbar-nav>
 
