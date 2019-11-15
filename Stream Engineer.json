@@ -3,31 +3,7 @@
   "backendCommand": "yarn run watch",
   "backendFolderName": "backend",
   "certificateExceptions": [],
-  "extensionViews": [
-    {
-      "id": "1",
-      "label": "",
-      "channelId": "25148021",
-      "configurationAnchor": "component",
-      "displayChannelName": "monstercat",
-      "type": "config",
-      "features": {
-        "isBitsEnabled": true,
-        "isChatEnabled": false,
-        "isSubscriptionStatusAvailable": false
-      },
-      "linked": true,
-      "linkedUserId": "265737932",
-      "mode": "config",
-      "isPopout": false,
-      "role": "Broadcaster",
-      "orientation": "Portrait",
-      "frameSize": {
-        "width": 1280,
-        "height": 720
-      }
-    }
-  ],
+  "extensionViews": [],
   "manifest": {
     "anchor": "component",
     "assetUrls": [],
@@ -65,7 +41,7 @@
     "summary": "This extension allows the viewers to send bits to trigger events in the broadcasters game, like meteors and turning the power off",
     "supportEmail": "contact@gorymoon.se",
     "vendorCode": "",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "viewerSummary": "Allows viewers to send bits to trigger events in Space Engineers",
     "viewerUrl": "",
     "viewerUrls": {
