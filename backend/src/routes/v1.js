@@ -178,7 +178,11 @@ router.post('/action/:game', async (req, res, next) => {
                 let settings = {}
                 if (action.settings != undefined) {
                     for (let [key, value] of Object.entries(action.settings)) {
-                        settings[key] = JSON.parse(value)
+                        try {
+                            settings[key] = JSON.parse(value)
+                        } catch(error) {
+                            settings[key] = value
+                        }
                     }
                 }
                 io.of('/v1').to(result.socket_id).emit('action', {

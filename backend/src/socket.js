@@ -116,10 +116,10 @@ export default function (server) {
             let settings = {}
             if (action.config != undefined) {
                 for (let [key, value] of Object.entries(action.config)) {
-                    if (key == "message") {
-                        settings[key] = value
-                    } else {
+                    try {
                         settings[key] = JSON.parse(value)
+                    } catch(error) {
+                        settings[key] = value
                     }
                 }
             }
