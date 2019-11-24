@@ -116,7 +116,11 @@ export default function (server) {
             let settings = {}
             if (action.config != undefined) {
                 for (let [key, value] of Object.entries(action.config)) {
-                    settings[key] = JSON.parse(value)
+                    if (key == "message") {
+                        settings[key] = value
+                    } else {
+                        settings[key] = JSON.parse(value)
+                    }
                 }
             }
             socket.emit('action', {
