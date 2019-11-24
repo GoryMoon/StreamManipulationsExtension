@@ -113,11 +113,17 @@ export default function (server) {
         })
 
         const replayListener = (action) => {
+            let settings = {}
+            if (action.config != undefined) {
+                for (let [key, value] of Object.entries(action.config)) {
+                    settings[key] = JSON.parse(value)
+                }
+            }
             socket.emit('action', {
                 bits: action.bits,
                 user: action.sender,
                 action: action.action,
-                settings: action.config
+                settings: settings
             })
         }
         events.on('run-' + data.channel_id, replayListener)
