@@ -1,6 +1,6 @@
 <template>
   <div class="chat">
-    <h1>Chat Channel Poinst</h1>
+    <h1>Chat Channel Points</h1>
     <b-button
     variant="outline-info"
     :pressed="chatStatus"
