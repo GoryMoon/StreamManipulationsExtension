@@ -7,12 +7,11 @@
 
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav v-if="hasUser">
-            <b-nav-item to="replay">
+            <b-nav-item to="replay" active-class="active">
               Replay Actions <b-badge v-if="getUnwatchedAmount > 0" variant="info">{{ getUnwatchedAmount }}</b-badge>
             </b-nav-item>
-            <b-nav-item to="actions">
-              Actions <b-badge v-if="getUnwatchedAmount > 0" variant="info">{{ getUnwatchedAmount }}</b-badge>
-            </b-nav-item>
+            <b-nav-item to="actions" active-class="active">Actions</b-nav-item>
+            <b-nav-item to="chat" active-class="active">Chat</b-nav-item>
           </b-navbar-nav>
 
           <b-navbar-nav class="ml-auto">

@@ -7,6 +7,7 @@ import expressStatusMonitor from 'express-status-monitor'
 import auth from 'http-auth'
 
 import app from '../app'
+import '../chat'
 import debugLib from 'debug'
 import http from 'http'
 //import https from 'https'

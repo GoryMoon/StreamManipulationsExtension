@@ -1,12 +1,12 @@
 import express from 'express';
-import session from "express-session";
-import passport from "passport";
-import passportTwitch from "passport-twitch.js";
-import history from "connect-history-api-fallback";
-import jwt from "jsonwebtoken";
-import cloneDeep from "lodash.clonedeep";
+import session from 'express-session';
+import passport from 'passport';
+import passportTwitch from 'passport-twitch.js';
+import history from 'connect-history-api-fallback';
+import jwt from 'jsonwebtoken';
+import cloneDeep from 'lodash.clonedeep';
 
-import User from "../models/user.model"
+import User from '../models/user.model'
 
 let TwitchStrategy = passportTwitch.Strategy;
 var router = express.Router();
@@ -17,7 +17,7 @@ router.use(session({secret: process.env.SECRET, resave: false, saveUninitialized
 passport.use(new TwitchStrategy({
     clientID: process.env.TWITCH_CLIENT_ID,
     clientSecret: process.env.TWITCH_CLIENT_SECRET,
-    callbackURL: process.env.URL + "/dashboard/auth/callback"
+    callbackURL: process.env.URL + '/dashboard/auth/callback'
 }, (accessToken, refreshToken, profile, done) => {
     User.findOne({ channel_id: profile.id }).then(result => {
         if (result != undefined) {

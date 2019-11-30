@@ -2,18 +2,18 @@ import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-import cors from "cors";
-import exphbs from "express-handlebars";
+import cors from 'cors';
+import exphbs from 'express-handlebars';
 import indexRouter from './routes/index';
-import helmet from "helmet";
-import compress from "compression";
+import helmet from 'helmet';
+import compress from 'compression';
 
 const app = express()
 
 app.use(logger('dev'))
 app.use(cors())
 app.use(helmet())
-app.disable("x-powered-by")
+app.disable('x-powered-by')
 app.use(compress())
 
 app.options('*', cors())

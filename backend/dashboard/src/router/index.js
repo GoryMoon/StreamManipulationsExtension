@@ -32,6 +32,15 @@ const routes = [
       title: 'Stream Engineer - Actions',
       auth: true
     }
+  },
+  {
+    path: '/chat',
+    name: 'chat',
+    component: () => import('../views/Chat.vue'),
+    meta: {
+      title: 'Stream Engineer - Chat',
+      auth: true
+    }
   }
 ]
 

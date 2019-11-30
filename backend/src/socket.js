@@ -1,13 +1,13 @@
 import IO from 'socket.io'
-import redisAdapter from "socket.io-redis";
-import jwt from "jsonwebtoken";
+import redisAdapter from 'socket.io-redis';
+import jwt from 'jsonwebtoken';
 import axios from 'axios';
 import moment from 'moment';
 import pick from 'lodash.pick'
 
-import User from "./models/user.model";
-import Config from "./models/config.model";
-import Action from "./models/action.model";
+import User from './models/user.model';
+import Config from './models/config.model';
+import Action from './models/action.model';
 import events from './events';
 
 
@@ -34,6 +34,7 @@ export default function (server) {
 
             User.findOne({channel_id: data.channel_id, token: data.token }).then(result => {
                 if (result != undefined) {
+                    data.user = result
                     socket.jwt = data
                     next()
                 } else {
@@ -51,6 +52,7 @@ export default function (server) {
 
         User.findOne({ channel_id: data.channel_id }).then((result, err) => {
             socket.emit('update_game_connection', result.socket_id !== null)
+            socket.emit('update_chat_status', 'connect_bot' in result && result.connect_bot === true)
         })
 
         Config.findOne({ channel_id: data.channel_id }).then((result, err) => {
@@ -63,8 +65,17 @@ export default function (server) {
         const connectionListener = (value) => {
             socket.emit('update_game_connection', value)
         }
+        const channelStatusListener = (value) => {
+            socket.emit('update_chat_status', value)
+        }
+        const cpListener = (action) => {
+            socket.emit('char_msg', action)
+        }
+
         events.on('action-' + data.channel_id, actionListener)
         events.on('connection-' + data.channel_id, connectionListener)
+        events.on('channel_status-' + data.channel_id, channelStatusListener)
+        events.on('cp-' + data.user.channel_name, cpListener)
 
         socket.on('more-actions', (offset) => {
             sendActions(socket, data.channel_id, offset)
@@ -80,9 +91,15 @@ export default function (server) {
             events.emit('run-' + data.channel_id, action)
         })
 
+        socket.on('channel_status', (channel_name, status) => {
+            events.emit('channel_status', data.channel_id, channel_name, status)
+        })
+
         socket.on('disconnect', () => {
             events.removeListener('action-' + data.channel_id, actionListener)
             events.removeListener('connection-' + data.channel_id, connectionListener)
+            events.removeListener('channel_status-' + data.channel_id, channelStatusListener)
+            events.removeListener('cp-' + data.user.channel_name, cpListener)
             console.log("Dashboard: " + socket.id + " disconnected")
         })
     })
@@ -130,12 +147,20 @@ export default function (server) {
                 settings: settings
             })
         }
+        const cpListener = (action) => {
+            socket.emit('cp_action', {
+                user: action.user,
+                id: action.id
+            })
+        }
         events.on('run-' + data.channel_id, replayListener)
+        events.on('cp-' + data.user.channel_name, cpListener)
         
         socket.on('disconnect', () => {
             User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null }).then((res, err) => {
                 events.emit('connection-' + data.channel_id, false)
                 events.removeListener('run-' + data.channel_id, replayListener)
+                events.removeListener('cp-' + data.user.channel_name, cpListener)
                 sendPubSub(data.channel_id, {
                     mod_active: false
                 })

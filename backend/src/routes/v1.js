@@ -1,16 +1,16 @@
 import express from 'express';
-import jwt from "jsonwebtoken";
-import uuid from "uuid/v4";
+import jwt from 'jsonwebtoken';
+import uuid from 'uuid/v4';
 import TwitchEbsTools from 'twitch-ebs-tools';
-import isEqual from "lodash.isequal";
-import emitter from "socket.io-emitter";
+import isEqual from 'lodash.isequal';
+import emitter from 'socket.io-emitter';
 const io = emitter({ host: process.env.REDIS, port: process.env.REDIS_PORT })
 
-import User from "../models/user.model"
-import Config from "../models/config.model";
-import Game from "../models/game.model";
-import Stat from "../models/stat.model";
-import Action from "../models/action.model";
+import User from '../models/user.model'
+import Config from '../models/config.model';
+import Game from '../models/game.model';
+import Stat from '../models/stat.model';
+import Action from '../models/action.model';
 import events from '../events';
 
 var router = express.Router();
@@ -68,7 +68,7 @@ router.get('/token/create', (req, res, next) => {
 
 function createToken(channel_id) {
     const token = uuid()
-    return User.updateOne({ channel_id: channel_id }, { token: token}, { upsert: true, setDefaultsOnInsert: true }).then(result => {
+    return User.updateOne({ channel_id: channel_id }, { token: token }, { upsert: true, setDefaultsOnInsert: true }).then(result => {
         return generateJWT(channel_id, token)
     })
 }
@@ -170,7 +170,7 @@ router.post('/action/:game', async (req, res, next) => {
             })
             events.emit('action-' + req.jwt.channel_id, result)
         } catch (error) {
-            console.log("Could not save an action to disk: " + req.body.action + " - " + JSON.stringify(req.body.settings))
+            console.log('Could not save an action to disk: ' + req.body.action + ' - ' + JSON.stringify(req.body.settings))
         }
         
         User.findOne({ channel_id: req.jwt.channel_id }).then(result => {

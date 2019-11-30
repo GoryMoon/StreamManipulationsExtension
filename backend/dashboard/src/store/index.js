@@ -8,7 +8,7 @@ import localforage from 'localforage'
 import router from '@/router'
 import {
   ADD_ACTION, ADD_ACTIONS, ADD_UNWATCHED, CLEAR_UNWATCHED, SET_USER,
-  UPDATE_ANIMATED_ICONS, SOCKET_UPDATE_GAME_CONNECTION, SOCKET_CONFIG } from './mutation-types'
+  UPDATE_ANIMATED_ICONS, SOCKET_UPDATE_GAME_CONNECTION, SOCKET_CONFIG, SOCKET_CHAT_MSG, SOCKET_UPDATE_CHAT_STATUS } from './mutation-types'
 
 Vue.use(Vuex)
 
@@ -28,6 +28,8 @@ export default new Vuex.Store({
     config: [],
     actions: {},
     unwatchedActions: [],
+    chatMessages: [],
+    chatStatus: false,
     animatedIcons: true,
     gameConnected: false
   },
@@ -76,6 +78,12 @@ export default new Vuex.Store({
     },
     [SOCKET_CONFIG] (state, config) {
       state.config = config
+    },
+    [SOCKET_CHAT_MSG] (state, msg) {
+      state.chatMessages.push(msg)
+    },
+    [SOCKET_UPDATE_CHAT_STATUS] (state, status) {
+      state.chatStatus = status
     },
     RESTORE_MUTATION: vuexStorage.RESTORE_MUTATION
   },
