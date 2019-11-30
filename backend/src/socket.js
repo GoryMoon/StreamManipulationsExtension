@@ -153,13 +153,13 @@ export default function (server) {
             })
         }
         events.on('run-' + data.channel_id, replayListener)
-        events.on('cp-' + data.user.channel_name, cpListener)
+        events.on('cp-' + data.channel_id, cpListener)
         
         socket.on('disconnect', () => {
             User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null }).then((res, err) => {
                 events.emit('connection-' + data.channel_id, false)
                 events.removeListener('run-' + data.channel_id, replayListener)
-                events.removeListener('cp-' + data.user.channel_name, cpListener)
+                events.removeListener('cp-' + data.channel_id, cpListener)
                 sendPubSub(data.channel_id, {
                     mod_active: false
                 })
