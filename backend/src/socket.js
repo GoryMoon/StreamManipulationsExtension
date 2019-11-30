@@ -34,7 +34,6 @@ export default function (server) {
 
             User.findOne({channel_id: data.channel_id, token: data.token }).then(result => {
                 if (result != undefined) {
-                    data.user = result
                     socket.jwt = data
                     next()
                 } else {
@@ -75,7 +74,7 @@ export default function (server) {
         events.on('action-' + data.channel_id, actionListener)
         events.on('connection-' + data.channel_id, connectionListener)
         events.on('channel_status-' + data.channel_id, channelStatusListener)
-        events.on('cp-' + data.user.channel_name, cpListener)
+        events.on('cp-' + data.channel_id, cpListener)
 
         socket.on('more-actions', (offset) => {
             sendActions(socket, data.channel_id, offset)
@@ -99,7 +98,7 @@ export default function (server) {
             events.removeListener('action-' + data.channel_id, actionListener)
             events.removeListener('connection-' + data.channel_id, connectionListener)
             events.removeListener('channel_status-' + data.channel_id, channelStatusListener)
-            events.removeListener('cp-' + data.user.channel_name, cpListener)
+            events.removeListener('cp-' + data.channel_id, cpListener)
             console.log("Dashboard: " + socket.id + " disconnected")
         })
     })

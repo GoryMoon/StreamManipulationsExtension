@@ -5,22 +5,25 @@ import events from './events';
 
 
 User.find({}).then((result) => {
-    var channels = []
+    var channels = new Map()
+    var channel_names = []
+
     result.forEach(user => {
         if ('channel_name' in user && 'connect_bot' in user && user.connect_bot === true) {
-            channels.push(user.channel_name)
+            channels.set(user.channel_name, user.channel_id)
+            channel_names.push(user.channel_name)
         }
     });
-    connectToChannels(channels)
+    connectToChannels(channels, channel_names)
 })
 
-function connectToChannels(channels) {
+function connectToChannels(channels, channel_names) {
     const client = new Client({
         connection: {
             secure: true,
             reconnect: true
         },
-        channels: channels
+        channels: channel_names
     })
     
     client.connect()
@@ -47,11 +50,14 @@ function connectToChannels(channels) {
     
     client.on('message', (channel, userstate, message, self) => {
         if ('custom-reward-id' in userstate) {
-            events.emit('cp-' + channel, {
-                user: userstate['display-name'],
-                message: message,
-                id: userstate['custom-reward-id']
-            })
+            let id = channels.get(channel)
+            if (id !== undefined) {
+                events.emit('cp-' + id, {
+                    user: userstate['display-name'],
+                    message: message,
+                    id: userstate['custom-reward-id']
+                })
+            }
         }
     })
 }
