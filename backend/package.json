@@ -7,7 +7,7 @@
     "start": "node ./bin/www",
     "server": "babel-node ./src/bin/www",
     "server:prod": "node ./dist/bin/www",
-    "dev": "cross-env NODE_ENV=development DEBUG=sebackend:*,engine,socket.io* npm-run-all server",
+    "dev": "cross-env NODE_ENV=development DEBUG=sebackend:* npm-run-all server",
     "clean": "rimraf dist",
     "build": "babel ./src --out-dir dist",
     "prod": "cross-env NODE_ENV=production npm-run-all clean build server:prod",

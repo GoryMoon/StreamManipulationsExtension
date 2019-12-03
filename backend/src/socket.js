@@ -68,7 +68,7 @@ export default function (server) {
             socket.emit('update_chat_status', value)
         }
         const cpListener = (action) => {
-            socket.emit('char_msg', action)
+            socket.emit('chat_msg', action)
         }
 
         events.on('action-' + data.channel_id, actionListener)

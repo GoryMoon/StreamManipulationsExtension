@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import VuexPersist from 'vuex-persist'
 import moment from 'moment'
 import orderBy from 'lodash.orderby'
+import remove from 'lodash.remove'
 import localforage from 'localforage'
 
 import router from '@/router'
@@ -42,6 +43,9 @@ export default new Vuex.Store({
         return moment(o.createdAt)
       }, ['desc'])
     },
+    getChat: (state) => {
+      return state.chatMessages
+    },
     getUnwatchedAmount: (state) => {
       return state.unwatchedActions.length
     },
@@ -80,7 +84,10 @@ export default new Vuex.Store({
       state.config = config
     },
     [SOCKET_CHAT_MSG] (state, msg) {
-      state.chatMessages.push(msg)
+      if (state.chatMessages.some(m => m.id === msg.id)) {
+        remove(state.chatMessages, (m) => m.id === msg.id)
+      }
+      state.chatMessages.unshift(msg)
     },
     [SOCKET_UPDATE_CHAT_STATUS] (state, status) {
       state.chatStatus = status

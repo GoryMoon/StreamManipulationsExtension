@@ -11,7 +11,7 @@
               Replay Actions <b-badge v-if="getUnwatchedAmount > 0" variant="info">{{ getUnwatchedAmount }}</b-badge>
             </b-nav-item>
             <b-nav-item to="actions" active-class="active">Actions</b-nav-item>
-            <b-nav-item to="chat" active-class="active">Chat</b-nav-item>
+            <b-nav-item to="channel_points" active-class="active">Channel Point Rewards</b-nav-item>
           </b-navbar-nav>
 
           <b-navbar-nav class="ml-auto">

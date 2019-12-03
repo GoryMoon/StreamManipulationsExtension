@@ -34,11 +34,11 @@ const routes = [
     }
   },
   {
-    path: '/chat',
-    name: 'chat',
-    component: () => import('../views/Chat.vue'),
+    path: '/channel_points',
+    name: 'channel_points',
+    component: () => import('../views/ChannelPoints.vue'),
     meta: {
-      title: 'Stream Engineer - Chat',
+      title: 'Stream Engineer - Channel Point Rewrds',
       auth: true
     }
   }

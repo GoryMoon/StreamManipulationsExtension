@@ -50,7 +50,7 @@ function connectToChannels(channels, channel_names) {
     
     client.on('message', (channel, userstate, message, self) => {
         if ('custom-reward-id' in userstate) {
-            let id = channels.get(channel)
+            let id = channels.get(channel.substring(1))
             if (id !== undefined) {
                 events.emit('cp-' + id, {
                     user: userstate['display-name'],
