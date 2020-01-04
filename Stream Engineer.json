@@ -3,7 +3,54 @@
   "backendCommand": "yarn run watch",
   "backendFolderName": "backend",
   "certificateExceptions": [],
-  "extensionViews": [],
+  "extensionViews": [
+    {
+      "id": "1",
+      "label": "",
+      "channelId": "25148021",
+      "configurationAnchor": "component",
+      "displayChannelName": "gorymoon",
+      "type": "component",
+      "features": {
+        "isBitsEnabled": true,
+        "isChatEnabled": false,
+        "isSubscriptionStatusAvailable": false
+      },
+      "linked": false,
+      "linkedUserId": "",
+      "mode": "viewer",
+      "isPopout": false,
+      "role": "Broadcaster",
+      "orientation": "Portrait",
+      "frameSize": {
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
+      "id": "2",
+      "label": "",
+      "channelId": "25148021",
+      "configurationAnchor": "component",
+      "displayChannelName": "gorymoon",
+      "type": "config",
+      "features": {
+        "isBitsEnabled": true,
+        "isChatEnabled": false,
+        "isSubscriptionStatusAvailable": false
+      },
+      "linked": true,
+      "linkedUserId": "265737932",
+      "mode": "config",
+      "isPopout": false,
+      "role": "Broadcaster",
+      "orientation": "Portrait",
+      "frameSize": {
+        "width": 1280,
+        "height": 720
+      }
+    }
+  ],
   "manifest": {
     "anchor": "component",
     "assetUrls": [],
@@ -12,7 +59,7 @@
     "canInstall": true,
     "configUrl": "http://localhost:8081/config.html",
     "configurationLocation": "hosted",
-    "description": "Viewers can use bits to send pre-configured actions to the broadcasters game. \nFor example, this can send meteors onto the broadcasters base, turn off their vehicle when they least expect it, refill their energy in their ship when they are stranded in space.",
+    "description": "Viewers can use bits to send pre-configured actions to the broadcasters game. \nThis extension supports multiple games, all supported ones can be found here https://github.com/GoryMoon/StreamEngineerExtension/wiki/Games\n\nThis was first made for Space Engineers, it has been updated to work with more games.\nSome examples of what you can do with Space Engineers are:\n* Send meteors onto the broadcasters base\n* Turn off their vehicle when they least expect it\n* Refill their energy in their ship when they are stranded in space.",
     "eulaTosUrl": "",
     "hasChatSupport": false,
     "iconUrl": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/logo49aa1b97-7f4d-4ce7-8591-8d5b1422629b",
@@ -24,7 +71,7 @@
     "id": "fk8z6ixu2azx334h30y13zqf6vgaus",
     "installationCount": -42,
     "liveConfigUrl": "",
-    "name": "Stream Engineer",
+    "name": "Game Integrations",
     "panelHeight": 0,
     "privacyPolicyUrl": "",
     "requestIdentityLink": false,
@@ -38,11 +85,11 @@
     "sku": "",
     "state": "Testing",
     "subscriptionsSupportLevel": "none",
-    "summary": "This extension allows the viewers to send bits to trigger events in the broadcasters game, like meteors and turning the power off",
+    "summary": "This extension allows the viewers to send bits to trigger events in the broadcasters game.",
     "supportEmail": "contact@gorymoon.se",
     "vendorCode": "",
-    "version": "1.0.2",
-    "viewerSummary": "Allows viewers to send bits to trigger events in Space Engineers",
+    "version": "1.0.3",
+    "viewerSummary": "Allows viewers to send bits to trigger events in supported games",
     "viewerUrl": "",
     "viewerUrls": {
       "mobile": "http://localhost:8081/mobile.html",
@@ -56,10 +103,10 @@
         "viewerUrl": "http://localhost:8081/component.html",
         "aspectWidth": 0,
         "aspectHeight": 0,
-        "aspectRatioX": 500,
-        "aspectRatioY": 700,
+        "aspectRatioX": 900,
+        "aspectRatioY": 1000,
         "autoscale": true,
-        "scalePixels": 350,
+        "scalePixels": 550,
         "targetHeight": 7000,
         "size": 0,
         "zoom": false,
@@ -72,12 +119,12 @@
       }
     },
     "whitelistedConfigUrls": [
-      "https://github.com/GoryMoon/StreamEngineer/releases"
+      "https://github.com/GoryMoon/StreamEngineerExtension/wiki/Games"
     ],
     "whitelistedPanelUrls": []
   },
   "frontendCommand": "yarn serve",
-  "frontendFolderName": "C:\\Users\\Gustaf\\Desktop\\SE\\twitch-extension-boilerplate-master\\frontend",
+  "frontendFolderName": "frontend",
   "name": "Stream Engineer",
   "version": 1
 }

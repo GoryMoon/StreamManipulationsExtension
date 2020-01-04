@@ -1,59 +1,131 @@
 <template>
-  <b-card no-body class="mb-1">
+  <b-card no-body>
     <b-card-header header-tag="header" class="p-1" role="tab">
       <b-button block href="#" v-b-toggle.actions variant="primary">Actions
         <fa class="when-opened" icon="chevron-up"></fa>
         <fa class="when-closed" icon="chevron-down"></fa>
-        </b-button>
+      </b-button>
     </b-card-header>
     <b-collapse id="actions" accordion="actions" role="tabpanel">
       <b-card-body>
-        <b-alert v-model="isChanged" variant="warning">
+        <div v-if="games !== null">
+          <h5 class="text-center mb-3">Game</h5>
+          <v-select
+            :options="getFilteredGames"
+            v-model="selectedGame"
+            @input="selectGame"
+            label="name"
+            placeholder="Select Game"
+          ></v-select>
+          <hr>
+        </div>
+        <div v-else>
+          <b-spinner class="text-center"></b-spinner>
+        </div>
+        <div
+          v-if="actions !== null && bitProducts !== null">
+          <h5 class="text-center mb-3">Actions</h5>
+          <b-alert :show="selectedGame !== null && selectedGame.dev" variant="warning">
+              <h4 class="alert-heading">Game in Dev Mode!</h4>
+              This game is in dev mode, actions for games in this mode dosn't take any bits.
+            </b-alert>
+          <transition name="fade">
+            <b-alert v-model="show_update" variant="warning">
+              <b-row>
+                <b-col cols="auto" class="mr-auto">
+                  <h4 class="alert-heading">Config update required!</h4>
+                  Save actions below or press the update button to the right
+                  </b-col>
+                <b-col cols="auto">
+                  <b-button variant="info" @click="saveActions">Update</b-button>
+                </b-col>
+              </b-row>
+            </b-alert>
+          </transition>
+          <transition name="fade">
+            <b-alert v-model="areActionsChanged" variant="warning">
+              <b-row>
+                <b-col cols="auto" class="mr-auto">You have unsaved changes!</b-col>
+                <b-col cols="auto">
+                  <b-button variant="info" @click="undoChanges">Undo</b-button>
+                </b-col>
+              </b-row>
+            </b-alert>
+          </transition>
           <b-row>
-            <b-col cols="auto" class="mr-auto">You have unsaved changes!</b-col>
-            <b-col cols="auto">
-              <b-button variant="outline-info" @click="undoChanges">Undo</b-button>
+            <b-col cols="4">
+              <v-select
+                label="title"
+                :options="actionData"
+                v-model="selectedInputData"
+                placeholder="Add Action"
+                @input="addAction"
+              ></v-select>
+            </b-col>
+            <b-col cols="8">
+              <b-button variant="outline-success" @click="saveActions">Save Actions</b-button>
+              <transition name="fade">
+                <span
+                v-if="show_saved"
+                class="text-success ml-3">
+                Saved <fa icon="check"></fa></span>
+              </transition>
             </b-col>
           </b-row>
-        </b-alert>
-        <b-dropdown variant="info" right class="mr-1" text="Add Action">
-          <b-dropdown-item
-            v-for="(value, index) in gamedata"
-            v-bind:key="index"
-            @click="addAction(index)">
-              {{ value.title }}
-          </b-dropdown-item>
-        </b-dropdown>
-        <b-button variant="outline-success" @click="saveActions">Save Actions</b-button>
-        <transition name="fade">
-          <span v-if="show_saved" class="text-success ml-3">Saved <fa icon="check"></fa></span>
-        </transition>
-        <b-table
-          :items="actions"
-          :busy="bitProducts === null"
-          :fields="fields"
-          striped
-          hover
-          class="mt-2">
-          <template v-slot:table-busy>
-            <div class="text-center text-danger my-2">
-              <b-spinner class="align-middle"></b-spinner>
-              <strong>Loading...</strong>
-            </div>
-          </template>
-          <template v-slot:cell(sku)="row">
-            {{ getPrice(row.value) }}
-          </template>
-          <template v-slot:cell(actions)="row">
-            <b-button
-              variant="outline-info"
-              class="mr-1"
-              @click="editAction(row.index)">
-                Edit
-            </b-button>
-            <b-button variant="outline-danger" @click="removeAction(row.index)">Remove</b-button>
-          </template>
-        </b-table>
+          <b-table-simple
+            striped
+            hover
+            class="mt-2">
+            <b-thead>
+              <b-tr>
+                <b-th>#</b-th>
+                <b-th>Action</b-th>
+                <b-th>Bits</b-th>
+                <b-th>Tools</b-th>
+              </b-tr>
+            </b-thead>
+            <draggable
+            tag="b-tbody"
+            v-model="actions"
+            ghost-class="ghost">
+              <tr v-for="action in actions" :key="action.key" class="draggable_action">
+                <td><fa class="action_icon" icon="grip-lines"></fa> </td>
+                <td>
+                  {{ action.title }}<br>
+                  <small>Type: <span class="text-info">{{ action.action }}</span></small>
+                </td>
+                <td>
+                  <bits-display
+                   :bits="getPrice(action.sku)"
+                   text-class="h6"
+                   :animated="true"
+                   width="25"
+                   height="25">
+                  </bits-display>
+                </td>
+                <td>
+                  <b-button
+                    variant="info"
+                    class="mr-1"
+                    @click="editAction(action.key)">
+                    <fa icon="wrench"/> Edit
+                  </b-button>
+                  <b-button
+                    variant="outline-danger"
+                    @click="removeAction(action.key)">
+                    <fa icon="trash-alt"/> Remove</b-button>
+                </td>
+              </tr>
+            </draggable>
+          </b-table-simple>
+        </div>
+        <div v-else-if="selectedGame !== null" class="text-center mt-3">
+          <h4 class="pb-2">Loading actions</h4>
+          <b-spinner variant="info"></b-spinner>
+        </div>
+        <div v-else class="text-center mt-3">
+          <h4>Select a game to continue</h4>
+        </div>
       </b-card-body>
     </b-collapse>
 
@@ -62,10 +134,13 @@
     ref="add_action_modal"
     v-model="modalShow"
     :busy="true"
-    title="Add action"
     @hidden="resetModal"
     @show="$v.selectedAction.$touch()"
     @ok="saveAction">
+      <template v-slot:modal-title="{}">
+        {{ selectedData.title }}<br>
+        <small class="text-muted">{{ selectedData.description }}</small>
+      </template>
       <b-form-group
       label="Title"
       description="The title to show to viewers"
@@ -117,7 +192,7 @@
         <b-form-group
         v-if="selectedData.message"
         label="Message"
-        description="Optional"
+        description="(Optional) Will show in-game"
         label-for="message_input">
         <b-form-input
           id="message_input"
@@ -127,26 +202,19 @@
         </b-form-group>
         <div v-if="selectedData.settings !== undefined">
           <hr>
-          <b-form-group
-          v-for="(value, index) in selectedData.settings"
-          :key="index"
-          :label="value.title"
-          :description="value.description"
-          :label-for="`settings_${index}`">
-            <b-form-input
-            :type="value.type"
-            :id="`settings-${index}`"
-            v-model="selectedAction.settings[value.key]"
-            :min="value.min || 0"
-            :max="value.max">
-            </b-form-input>
-          </b-form-group>
+          <input-component
+            v-for="(value, index) in selectedData.settings"
+            :key="index"
+            :index="index"
+            :data="value"
+            :id="`settings_${index}`"
+            v-model="selectedAction.settings[value.key]">
+          </input-component>
         </div>
       </b-form>
-      <template v-slot:modal-footer="{ ok, cancel, hide }">
+      <template v-slot:modal-footer="{ ok }">
         <b-button
-        class="mt-3"
-        variant="outline-success"
+        :variant="$v.selectedAction.$invalid ? 'outline-success': 'success'"
         block
         @click="ok()"
         :disabled="$v.selectedAction.$invalid">
@@ -158,29 +226,42 @@
 </template>
 
 <script>
+import _cloneDeep from 'lodash/cloneDeep';
+import _debounce from 'lodash/debounce';
+import _pick from 'lodash/pick';
+import _map from 'lodash/map';
+import _find from 'lodash/find';
+import _findIndex from 'lodash/findIndex';
+import draggable from 'vuedraggable';
 import { required } from 'vuelidate/lib/validators';
-import isEqual from 'lodash.isequal';
-import cloneDeep from 'lodash.clonedeep';
-import debounce from 'lodash.debounce';
+import { mapState, mapGetters } from 'vuex';
+
+import { GET_GAMES, GET_ACTION_DATA, GET_GAME_ACTIONS } from '@/stores/action-types';
+import {
+  SET_ACTIONS, SET_DEFAULT_ACTIONS, SET_BIT_PRODUCTS,
+  ADD_ACTION, SET_ACTION, REMOVE_ACTION,
+} from '@/stores/mutation-types';
+import InputComponent from './InputComponent.vue';
+import BitsDisplay from './BitsDisplay.vue';
+
 
 export default {
-  name: 'ConfigActions',
+  name: 'config-actions',
+  components: {
+    draggable,
+    InputComponent,
+    BitsDisplay,
+  },
   data() {
     return {
-      gamedata: [],
-      actions: [],
-      defaultActions: [],
-      configVersion: '',
-      bitProducts: null,
-      fields: [
-        { key: 'title', sortable: false },
-        { key: 'sku', label: 'Bits', sortable: false },
-        'actions'],
+      selectedGame: null,
+      selectedInputData: null,
       selectedData: {},
       selectedAction: {},
       selectedActionIndex: -1,
       modalShow: false,
       show_saved: false,
+      show_update: false,
     };
   },
   validations: {
@@ -197,17 +278,17 @@ export default {
     },
   },
   methods: {
-    getActionData() {
-      this.axios.get('game/spaceengineers', {
-        headers: {
-          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
-        },
-      }).then((result) => {
-        this.gamedata = result.data.data;
-      });
+    selectGame(game) {
+      if (game !== null) {
+        this.$store.dispatch(GET_ACTION_DATA, game.id);
+        this.$store.dispatch(GET_GAME_ACTIONS, game.id);
+      } else {
+        this.$store.commit(SET_ACTIONS, null);
+        this.$store.commit(SET_DEFAULT_ACTIONS, null);
+      }
     },
-    addAction(index) {
-      this.selectedData = this.gamedata[index];
+    addAction(action) {
+      this.selectedData = action;
       this.selectedAction = {
         action: this.selectedData.action,
         title: this.selectedData.title,
@@ -217,25 +298,28 @@ export default {
       if (this.selectedData.settings) {
         this.selectedAction.settings = {};
         this.selectedData.settings.forEach((data) => {
-          this.selectedAction.settings[data.key] = cloneDeep(data.default);
+          this.selectedAction.settings[data.key] = _cloneDeep(data.default);
         });
       }
       this.modalShow = true;
+      this.selectedInputData = null;
     },
-    editAction(index) {
-      this.selectedAction = this.actions[index];
-      this.selectedData = this.gamedata.find(d => d.action === this.selectedAction.action);
+    editAction(key) {
+      const index = _findIndex(this.actions, ['key', key]);
+      this.selectedAction = _cloneDeep(this.actions[index]);
+      this.selectedData = _find(this.actionData, ['action', this.selectedAction.action]);
       this.selectedActionIndex = index;
       this.modalShow = true;
     },
-    removeAction(index) {
-      this.actions.splice(index, 1);
+    removeAction(key) {
+      const index = _findIndex(this.actions, ['key', key]);
+      this.$store.commit(REMOVE_ACTION, index);
     },
     resetModal() {
       this.selectedActionIndex = -1;
     },
     undoChanges() {
-      this.actions = cloneDeep(this.defaultActions);
+      this.$store.commit(SET_ACTIONS, _cloneDeep(this.defaultActions));
     },
     saveAction(bvModalEvt) {
       bvModalEvt.preventDefault();
@@ -246,31 +330,33 @@ export default {
       }
 
       if (this.selectedActionIndex === -1) {
-        this.actions.push(this.selectedAction);
+        this.selectedAction.key = this.actions.length;
+        this.$store.commit(ADD_ACTION, this.selectedAction);
       } else {
-        this.$set(this.actions, this.selectedActionIndex, this.selectedAction);
+        this.$store.commit({
+          type: SET_ACTION,
+          index: this.selectedActionIndex,
+          action: this.selectedAction,
+        });
       }
 
       this.$nextTick(() => {
         this.$refs.add_action_modal.hide();
       });
     },
-    saveActions: debounce(function request() {
-      this.$twitchExtension.configuration.set('broadcaster', '1.0', JSON.stringify(this.actions));
-      this.axios.post('/actions/spaceengineers', { config: this.actions }, {
+    saveActions: _debounce(function request() {
+      const newActions = _map(this.actions,
+        (val) => _pick(val, ['action', 'description', 'message', 'settings', 'sku', 'title']));
+      this.axios.post(`/actions/${this.selectedGame.id}`, { config: newActions }, {
         headers: {
           authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
         },
       });
-      this.$twitchExtension.send('broadcast', 'application/json', { type: 'config', actions: this.actions });
       this.show_saved = true;
-      this.defaultActions = cloneDeep(this.actions);
+      this.show_update = false;
+      this.$store.commit(SET_DEFAULT_ACTIONS, _cloneDeep(this.actions));
       setTimeout(() => { this.show_saved = false; }, 1500);
     }, 400, { leading: true, trailing: false }),
-    getPrice(sku) {
-      const product = this.bitProducts.find(p => p.sku === sku);
-      return (product && product.cost.amount) || 0;
-    },
     tap(value, fn) {
       fn(value);
       return value;
@@ -285,34 +371,79 @@ export default {
   },
   computed: {
     getBitOptions() {
-      return this.bitProducts !== null
-        ? this.tap(this.bitProducts.map(o => ({ value: o.sku, text: o.cost.amount })), m => m.unshift({ value: null, text: 'Select the amount of bits for this action', disabled: true }))
+      return this.bitProducts !== null && this.selectedGame !== null
+        ? this.tap(this.bitProducts
+          .filter((prod) => (this.selectedGame.dev && prod.inDevelopment !== undefined)
+          || (!this.selectedGame.dev && prod.inDevelopment === undefined))
+          .map((o) => ({ value: o.sku, text: (this.selectedGame.dev ? '(Dev) ' : '') + o.cost.amount })),
+        (m) => m.unshift({ value: null, text: 'Select the amount of bits for this action', disabled: true }))
         : {};
     },
-    isChanged() {
-      return !isEqual(this.actions, this.defaultActions);
+    actions: {
+      get() {
+        return this.$store.state.actions;
+      },
+      set(value) {
+        this.$store.commit(SET_ACTIONS, value);
+      },
     },
+    getFilteredGames() {
+      return this.games.filter((game) => game.dev === false || game.dev === this.dev);
+    },
+    ...mapGetters([
+      'areActionsChanged',
+      'getPrice',
+    ]),
+    ...mapState([
+      'defaultActions',
+      'actionData',
+      'bitProducts',
+      'games',
+      'dev',
+    ]),
   },
   beforeMount() {
-    this.getActionData();
-    const conf = this.$twitchExtension.configuration.broadcaster;
-    this.actions = conf !== undefined ? JSON.parse(conf.content) : [];
-    this.defaultActions = cloneDeep(this.actions);
-    this.configVersion = conf !== undefined ? conf.version : '0';
+    this.$store.dispatch(GET_GAMES);
+    const dev = this.$twitchExtension.configuration.developer;
+    if (dev !== undefined && dev.version !== undefined) {
+      if (dev.version === '1.0') {
+        this.show_update = true;
+      }
+    }
     this.$twitchExtension.bits.getProducts().then((data) => {
-      this.bitProducts = data;
-      this.bitProducts.sort((a, b) => a.cost.amount - b.cost.amount);
+      const products = data;
+      products.sort((a, b) => a.cost.amount - b.cost.amount);
+      this.$store.commit(SET_BIT_PRODUCTS, products);
     });
   },
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
 }
+
+.draggable_action {
+  transform: inherit !important;
+  cursor: move;
+
+  td {
+    vertical-align: middle;
+  }
+
+  .action_icon {
+    font-size: 18pt;
+    text-align: center;
+    vertical-align: middle;
+  }
+}
+
+.ghost {
+  opacity: 0.1;
+}
+
 </style>

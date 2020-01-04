@@ -1,3 +1,11 @@
 @import '~bootstrap';
 @import './bootswatch';
 @import '~bootstrap-vue';
+@import 'vue-select/src/scss/vue-select.scss';
+
+.v-select {
+    .vs__dropdown-toggle {
+        @extend .form-control;
+        display: flex;
+    }
+}

@@ -1,37 +1,39 @@
 <template>
-  <div class="mb-5">
+  <simplebar
+  data-simplebar-auto-hide="false"
+  class="h-100 w-100 pb-5">
     <b-container v-if="isLoaded && !maintenance">
-      <h1 class="mt-3">StreamEngineer Config</h1>
+      <h1 class="mt-3">Game Integrations Config</h1>
       <hr>
       <div v-if="!$twitchExtension.features.isBitsEnabled">
         <b-alert variant="danger" show>This extension requires bits to work</b-alert>
       </div>
       <p>
-        This extension requires the
-        <a target="_blank" href="https://github.com/GoryMoon/StreamEngineer/releases">StreamEngineer <fa icon="external-link-alt"></fa></a>
-        plugin for SpaceEngineers to be installed on the client.
+        Games that support this extension, download links and information on
+        how to setup the games can be found on the following page. <br/>
+        <a target="_blank" href="https://github.com/GoryMoon/StreamEngineerExtension/wiki/Games">Wiki page <fa icon="external-link-alt"></fa></a>
       </p>
-      <p>Instruction on how to install it can be found in the download or on the github page.</p>
-      <ConfigToken></ConfigToken>
-      <ConfigActions></ConfigActions>
+      <config-token></config-token>
+      <config-actions></config-actions>
     </b-container>
     <div v-else-if="maintenance" class="text-center pt-5">
-        <h3>Server down for maintenance</h3>
-      </div>
-  </div>
+      <h3>Server down for maintenance</h3>
+    </div>
+    <div v-else class="text-center pt-5">
+      <h3>Loading extension</h3>
+      <b-spinner></b-spinner>
+    </div>
+  </simplebar>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import { SET_MAINTENANCE, SET_LOADED } from '@/stores/mutation-types';
+
 import ConfigToken from '@/components/ConfigToken.vue';
 import ConfigActions from '@/components/ConfigActions.vue';
 
 export default {
-  data() {
-    return {
-      loaded: false,
-      maintenance: false,
-    };
-  },
   computed: {
     isLoaded() {
       return this.$twitchExtension.channel.initialized
@@ -39,6 +41,10 @@ export default {
       && this.$twitchExtension.context.initialized
       && this.$twitchExtension.viewer.initialized;
     },
+    ...mapState([
+      'loaded',
+      'maintenance',
+    ]),
   },
   components: {
     ConfigToken,
@@ -46,9 +52,16 @@ export default {
   },
   beforeUpdate() {
     if (this.isLoaded && !this.loaded) {
-      this.loaded = true;
+      this.$store.commit(SET_LOADED, true);
+
       const data = this.$twitchExtension.configuration.global.content;
-      this.maintenance = data !== undefined ? JSON.parse(data).maintenance : false;
+      const maintenance = data !== undefined ? JSON.parse(data).maintenance : false;
+      this.$store.commit(SET_MAINTENANCE, maintenance);
+      this.$bugsnag.user = {
+        id: this.$twitchExtension.viewer.opaqueId,
+        channel: this.$twitchExtension.channel.id,
+        game: this.$twitchExtension.context.game,
+      };
     }
   },
 };

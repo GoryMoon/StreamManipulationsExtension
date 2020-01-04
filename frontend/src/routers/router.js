@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from '@/views/Home.vue';
+import ActionList from '@/views/ActionList.vue';
+import SendBits from '@/views/SendBits.vue';
 
 Vue.use(Router);
 
@@ -9,7 +10,12 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Home,
+      component: ActionList,
+    },
+    {
+      path: '/send-bits',
+      name: 'send-bits',
+      component: SendBits,
     },
   ],
 });

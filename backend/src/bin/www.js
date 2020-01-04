@@ -10,25 +10,13 @@ import app from '../app'
 import '../chat'
 import debugLib from 'debug'
 import http from 'http'
-//import https from 'https'
-//import path from 'path'
-//import fs from 'fs'
 import socket from '../socket'
 const debug = debugLib('sebackend:server');
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-/*if (process.env.NODE_ENV === "development") {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  const serverPathRoot = path.resolve(__dirname, '..', '..', 'conf', 'server');
-  var server = https.createServer({
-    cert: fs.readFileSync(serverPathRoot + '.crt'),
-    key: fs.readFileSync(serverPathRoot + '.key'),
-  },app);
-} else {*/
-  var server = http.createServer(app);
-//}
+var server = http.createServer(app);
 
 server.listen(port);
 server.on('error', onError);
@@ -44,13 +32,13 @@ const statusMonitor = expressStatusMonitor({
           protocol: 'http',
           host: 'localhost',
           port: process.env.PORT,
-          path: '/v1/token/'
+          path: '/v2/token/'
       },
       {
           protocol: 'http',
           host: 'localhost',
           port: process.env.PORT,
-          path: '/v1/token/create'
+          path: '/v2/token/create'
       },
       {
           protocol: 'http',

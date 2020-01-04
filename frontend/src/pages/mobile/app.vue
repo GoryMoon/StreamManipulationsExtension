@@ -1,3 +1,4 @@
+<!-- OLD, NOT USED -->
 <template>
   <div id="app">
     <b-container class="main" fluid v-if="this.isLoaded">

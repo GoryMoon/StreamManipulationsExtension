@@ -13,7 +13,6 @@ const app = express()
 app.use(logger('dev'))
 app.use(cors())
 app.use(helmet())
-app.disable('x-powered-by')
 app.use(compress())
 
 app.options('*', cors())
@@ -22,8 +21,9 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.engine('handlebars', exphbs())
 app.set('view engine', 'handlebars')
-app.use(express.static(path.join(__dirname, '../public')))
+app.disable('etag')
 
 app.use('/', indexRouter);
+app.use(express.static(path.join(__dirname, '../public')))
 
 export default app;

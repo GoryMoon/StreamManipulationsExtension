@@ -3,6 +3,8 @@ import db from '../db'
 
 const schema = new Schema({
     game: String,
+    name: String,
+    dev: Boolean,
     data: Schema.Types.Mixed
 })
 
