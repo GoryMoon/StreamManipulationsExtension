@@ -38,9 +38,9 @@
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.1.2",
-    "@vue/cli-plugin-vuex": "^4.1.2",
-    "@vue/cli-plugin-router": "^4.1.2",
     "@vue/cli-plugin-eslint": "^4.1.2",
+    "@vue/cli-plugin-router": "^4.1.2",
+    "@vue/cli-plugin-vuex": "^4.1.2",
     "@vue/cli-service": "^4.1.2",
     "@vue/eslint-config-airbnb": "^5.0.0",
     "babel-eslint": "^10.0.3",
