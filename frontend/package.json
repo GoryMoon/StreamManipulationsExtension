@@ -4,7 +4,8 @@
   "private": true,
   "sideEffects": [
     "*.css",
-    "*.scss"
+    "*.scss",
+    "*.vue"
   ],
   "scripts": {
     "serve": "vue-cli-service serve",

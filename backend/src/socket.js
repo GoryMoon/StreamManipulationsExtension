@@ -170,45 +170,50 @@ export default function (server) {
     var v2 = io.of('/v2');
     v2.use(middleware)
     v2.on('connection', (socket) => {
-        const changeGame = (game) => {
-            Game.findOne({ game }).then((response, err) => {
-                if (_isNil(err) && !_isNil(response)) {
-                    User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true })
-                        .then((_res, err) => {
-                            if (_isNil(err)) {
-                                Config.findOne({ channel_id: data.channel_id, game}).then((res, err) => {
-                                    if (_isNil(err)) {
-                                        const fetch = 
-                                            _isNil(err) || _isNil(res.config) ? 
-                                                false: 
-                                                (new TextEncoder().encode(JSON.stringify(res.config))).length > 4500;
-                                        sendPubSub(data.channel_id, {
-                                            type: 'load',
-                                            game,
-                                            fetch,
-                                            actions: !fetch ? (_isNil(res) || _isNil(res.config) ? []: res.config): []
-                                        })
-                                        sendConfig(data.channel_id, {
-                                            game,
-                                            fetch
-                                        }, 'developer', '1.1')
-                                        if (!fetch && !_isNil(res) && !_isNil(res.config)) {
-                                            sendConfig(data.channel_id, res.config, 'broadcaster', '1.1')
-                                        }
-                                        events.emit('connection-' + data.channel_id, true)
-                                    }
-                                })
-                            }
-                        })
-                } else {
-                    socket.error('Game not valid')
-                    socket.disconnect(true)
-                }
-            })
-        }
-
         const data = socket.jwt
         const game = socket.handshake.query.game
+
+        const changeGame = (game) => {
+            if (!_isNil(game) && game !== '') {
+                unload(data.channel_id)
+            } else {
+                Game.findOne({ game }).then((response, err) => {
+                    if (_isNil(err) && !_isNil(response)) {
+                        User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true })
+                            .then((_res, err) => {
+                                if (_isNil(err)) {
+                                    Config.findOne({ channel_id: data.channel_id, game}).then((res, err) => {
+                                        if (_isNil(err)) {
+                                            const fetch = 
+                                                _isNil(err) || _isNil(res.config) ? 
+                                                    false: 
+                                                    (new TextEncoder().encode(JSON.stringify(res.config))).length > 4500;
+                                            sendPubSub(data.channel_id, {
+                                                type: 'load',
+                                                game,
+                                                fetch,
+                                                actions: !fetch ? (_isNil(res) || _isNil(res.config) ? []: res.config): []
+                                            })
+                                            sendConfig(data.channel_id, {
+                                                game,
+                                                fetch
+                                            }, 'developer', '1.1')
+                                            if (!fetch && !_isNil(res) && !_isNil(res.config)) {
+                                                sendConfig(data.channel_id, res.config, 'broadcaster', '1.1')
+                                            }
+                                            events.emit('connection-' + data.channel_id, true)
+                                        }
+                                    })
+                                }
+                            })
+                    } else {
+                        socket.error('Game not valid')
+                        socket.disconnect(true)
+                    }
+                })
+            }
+        }
+
         if (!_isNil(game) && game !== '') {
             changeGame(game)
         }
@@ -237,6 +242,21 @@ export default function (server) {
                 id: action.id
             })
         }
+
+        function unload(channel_id) {
+            events.emit('connection-' + channel_id, false)
+            events.removeListener('run-' + channel_id, replayListener)
+            events.removeListener('cp-' + channel_id, cpListener)
+            sendPubSub(channel_id, {
+                type: 'unload'
+            })
+            sendConfig(channel_id, {
+                game: '',
+                fetch: false,
+            }, 'developer', '1.1')
+            sendConfig(channel_id, [], 'broadcaster', '1.1')
+        }
+
         events.on('run-' + data.channel_id, replayListener)
         events.on('cp-' + data.channel_id, cpListener)
 
@@ -245,17 +265,7 @@ export default function (server) {
         socket.on('disconnect', () => {
             User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null })
             .then((_res, _err) => {
-                events.emit('connection-' + data.channel_id, false)
-                events.removeListener('run-' + data.channel_id, replayListener)
-                events.removeListener('cp-' + data.channel_id, cpListener)
-                sendPubSub(data.channel_id, {
-                    type: 'unload'
-                })
-                sendConfig(data.channel_id, {
-                    game: '',
-                    fetch: false,
-                }, 'developer', '1.1')
-                sendConfig(data.channel_id, [], 'broadcaster', '1.1')
+                unload(data.channel_id)
             })
         })
     })
