@@ -51,7 +51,7 @@ export default {
   name: 'replay',
   sockets: {
     connect_actions (actions) {
-      this.$refs['load_more'].disabled = false
+      this.$refs.load_more.disabled = false
     }
   },
   data () {
@@ -80,7 +80,7 @@ export default {
       return startCase(type)
     },
     getBitImage (bits) {
-      let icons = this.animatedIcons ? this.icons.animated : this.icons.static
+      const icons = this.animatedIcons ? this.icons.animated : this.icons.static
       return (bits < 100 ? icons.gray : bits < 1000 ? icons.purple : bits < 5000 ? icons.green : bits < 10000 ? icons.blue : icons.red)
     },
     getBitColor (bits) {
@@ -100,7 +100,7 @@ export default {
       })
     },
     loadMore () {
-      this.$refs['load_more'].disabled = true
+      this.$refs.load_more.disabled = true
       this.$store.dispatch('load_more_actions')
     }
   },

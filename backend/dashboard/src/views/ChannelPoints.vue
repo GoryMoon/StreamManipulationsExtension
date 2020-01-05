@@ -38,7 +38,6 @@ export default {
   },
   methods: {
     toggleChatStatus () {
-      console.log(this.user)
       this.$socket.client.emit('channel_status', this.user.login, !this.chatStatus)
     }
   },

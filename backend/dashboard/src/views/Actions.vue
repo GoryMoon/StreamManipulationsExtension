@@ -74,14 +74,14 @@ export default {
       return sku.replace('value', '')
     },
     getBitImage (bits) {
-      let icons = this.animatedIcons ? this.icons.animated : this.icons.static
+      const icons = this.animatedIcons ? this.icons.animated : this.icons.static
       return (bits < 100 ? icons.gray : bits < 1000 ? icons.purple : bits < 5000 ? icons.green : bits < 10000 ? icons.blue : icons.red)
     },
     getBitColor (bits) {
       return 'bits ' + (bits < 100 ? 'bits-10' : bits < 1000 ? 'bits-100' : bits < 5000 ? 'bits-1000' : bits < 10000 ? 'bits-5000' : 'bits-10000')
     },
     run (id) {
-      let config = this.getActions[id]
+      const config = this.getActions[id]
       const action = {
         bits: this.cleanSku(config.sku),
         sender: this.user.display_name,
