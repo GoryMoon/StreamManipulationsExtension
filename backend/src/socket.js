@@ -171,10 +171,9 @@ export default function (server) {
     v2.use(middleware)
     v2.on('connection', (socket) => {
         const data = socket.jwt
-        const game = socket.handshake.query.game
 
         const changeGame = (game) => {
-            if (!_isNil(game) && game !== '') {
+            if (_isNil(game) || game === '') {
                 unload(data.channel_id)
             } else {
                 Game.findOne({ game }).then((response, err) => {
@@ -214,6 +213,7 @@ export default function (server) {
             }
         }
 
+        const game = socket.handshake.query.game
         if (!_isNil(game) && game !== '') {
             changeGame(game)
         }
