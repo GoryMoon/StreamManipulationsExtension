@@ -117,7 +117,7 @@ export default function (server) {
     v1.on('connection', (socket) => {
         const data = socket.jwt
         User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true }).then((res, err) => {
-            if (isNil(err)) {
+            if (_isNil(err)) {
                 events.emit('connection-' + data.channel_id, true)
                 sendPubSub(data.channel_id, {
                     mod_active: true
@@ -184,7 +184,7 @@ export default function (server) {
                                     Config.findOne({ channel_id: data.channel_id, game}).then((res, err) => {
                                         if (_isNil(err)) {
                                             const fetch = 
-                                                _isNil(err) || _isNil(res.config) ? 
+                                                _isNil(err) || _isNil(res) || _isNil(res.config) ? 
                                                     false: 
                                                     (new TextEncoder().encode(JSON.stringify(res.config))).length > 4500;
                                             sendPubSub(data.channel_id, {
