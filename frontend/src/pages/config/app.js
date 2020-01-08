@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import '@/devtools'; // Import before vuex to make state listener to work
+// import '@/devtools'; // Import before vuex to make state listener to work
 import Vuex from 'vuex';
 import BootstrapVue from 'bootstrap-vue';
 import axios from 'axios';

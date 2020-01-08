@@ -142,7 +142,8 @@
     v-model="modalShow"
     :busy="true"
     @hidden="resetModal"
-    @show="$v.selectedAction.$touch()"
+    @show="showModal"
+    @shown="shownModal"
     @ok="saveAction">
       <template v-slot:modal-title="{}">
         {{ selectedData.title }}<br>
@@ -242,6 +243,7 @@ import _findIndex from 'lodash/findIndex';
 import draggable from 'vuedraggable';
 import { required } from 'vuelidate/lib/validators';
 import { mapState, mapGetters } from 'vuex';
+import Simplebar from 'simplebar';
 
 import { GET_GAMES, GET_ACTION_DATA, GET_GAME_ACTIONS } from '@/stores/action-types';
 import {
@@ -321,6 +323,13 @@ export default {
     removeAction(key) {
       const index = _findIndex(this.actions, ['key', key]);
       this.$store.commit(REMOVE_ACTION, index);
+    },
+    showModal() {
+      this.$v.selectedAction.$touch();
+    },
+    shownModal(modal) {
+      // eslint-disable-next-line no-new
+      new Simplebar(modal.vueTarget.$refs.modal);
     },
     resetModal() {
       this.selectedActionIndex = -1;

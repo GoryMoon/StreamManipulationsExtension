@@ -1,6 +1,5 @@
 <template>
   <simplebar
-  data-simplebar-auto-hide="false"
   class="h-100 w-100 pb-5">
     <b-container v-if="isLoaded && !maintenance">
       <h1 class="mt-3">Stream Manipulations Config</h1>

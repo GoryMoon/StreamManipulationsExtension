@@ -171,7 +171,7 @@ Vue.use(ExtensionPlugin, {
   store,
   settings: {
     forceFlags: {
-      forceIsBitsEnabled: false, // TODO change in production
+      forceIsBitsEnabled: false,
     },
   },
 });
