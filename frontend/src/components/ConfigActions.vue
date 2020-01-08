@@ -27,7 +27,7 @@
           <h5 class="text-center mb-3">Actions</h5>
           <b-alert :show="selectedGame !== null && selectedGame.dev" variant="warning">
               <h4 class="alert-heading">Game in Dev Mode!</h4>
-              This game is in dev mode, actions for games in this mode dosn't take any bits.
+              This game is in dev mode, actions for games in this mode doesn't take any bits.
             </b-alert>
           <transition name="fade">
             <b-alert v-model="show_update" variant="warning">
@@ -73,6 +73,7 @@
             </b-col>
           </b-row>
           <b-table-simple
+            v-if="actions.length > 0"
             striped
             hover
             class="mt-2">
@@ -118,6 +119,12 @@
               </tr>
             </draggable>
           </b-table-simple>
+          <div
+          v-else
+          class="text-center mt-4">
+              <h5>No actions</h5>
+              <small class="text-muted">Start by adding an action above</small>
+            </div>
         </div>
         <div v-else-if="selectedGame !== null" class="text-center mt-3">
           <h4 class="pb-2">Loading actions</h4>

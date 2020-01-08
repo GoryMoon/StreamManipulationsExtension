@@ -1,4 +1,4 @@
-# Stream Engineer Extension
+# Stream Manipulations Extension
 
 `backend` contains all thing that run on the backend and talks to the mod
 

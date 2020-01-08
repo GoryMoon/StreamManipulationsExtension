@@ -59,33 +59,33 @@
     "canInstall": true,
     "configUrl": "http://localhost:8081/config.html",
     "configurationLocation": "hosted",
-    "description": "Viewers can use bits to send pre-configured actions to the broadcasters game. \nThis extension supports multiple games, all supported ones can be found here https://github.com/GoryMoon/StreamEngineerExtension/wiki/Games\n\nThis was first made for Space Engineers, it has been updated to work with more games.\nSome examples of what you can do with Space Engineers are:\n* Send meteors onto the broadcasters base\n* Turn off their vehicle when they least expect it\n* Refill their energy in their ship when they are stranded in space.",
+    "description": "Viewers can use bits to send pre-configured actions to the broadcasters game. \nThis extension supports multiple games, all supported ones can be found here https://github.com/GoryMoon/StreamManipulationsExtension/wiki/Games\n\nThis was originally made for Space Engineers, it has been updated to work with more games.\nSome examples of what you can do with Space Engineers are:\n* Send meteors onto the broadcasters base\n* Turn off their vehicle when they least expect it\n* Refill their energy in their ship when they are stranded in space.",
     "eulaTosUrl": "",
     "hasChatSupport": false,
-    "iconUrl": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/logo49aa1b97-7f4d-4ce7-8591-8d5b1422629b",
+    "iconUrl": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/logo918f7ed7-54c9-4546-8f1c-2b6f74fee6ec",
     "iconUrls": {
-      "100x100": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/logo49aa1b97-7f4d-4ce7-8591-8d5b1422629b",
-      "24x24": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/taskbar88c35958-bb13-48b9-b05c-70918e194fbb",
-      "300x200": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/discovery2dd6e2d8-30d6-4301-be2e-13004eeffae4"
+      "100x100": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/logo918f7ed7-54c9-4546-8f1c-2b6f74fee6ec",
+      "24x24": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/taskbara4bc507e-3e91-485d-94ba-c34dba8a1c9c",
+      "300x200": "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/discoveryb1534ebd-303a-4fa7-9c29-08b7f8fb20a4"
     },
     "id": "fk8z6ixu2azx334h30y13zqf6vgaus",
     "installationCount": -42,
     "liveConfigUrl": "",
-    "name": "Game Integrations",
+    "name": "Stream Manipulations",
     "panelHeight": 0,
     "privacyPolicyUrl": "",
     "requestIdentityLink": false,
     "requiredBroadcasterAbilities": [],
     "screenshotUrls": [
-      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshot4f1a0bae-c86c-4136-9d98-66d0d7f5210f",
-      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshot07abf34a-53d3-4588-ba0f-1b3c93dadb28",
-      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshot677572c9-d250-4a90-822e-035066197237",
-      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.0/screenshotaac277a1-801b-4b53-a639-01e1a0dd6f02"
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/screenshot04934408-93ff-472f-bfd3-8347905c9e86",
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/screenshoteb36b7ed-dfb0-4f9f-8d67-25074c87c24b",
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/screenshotda201998-f7a0-4288-bfdb-3c8676de95bb",
+      "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/screenshot7a7c4d6a-d058-4bd0-85ce-eafd3b15904b"
     ],
     "sku": "",
     "state": "Testing",
     "subscriptionsSupportLevel": "none",
-    "summary": "This extension allows the viewers to send bits to trigger events in the broadcasters game.",
+    "summary": "This extension allows the viewers to send bits to trigger events in the broadcasters game. Formerly Stream Engineer.",
     "supportEmail": "contact@gorymoon.se",
     "vendorCode": "",
     "version": "1.0.3",
@@ -119,7 +119,7 @@
       }
     },
     "whitelistedConfigUrls": [
-      "https://github.com/GoryMoon/StreamEngineerExtension/wiki/Games"
+      "https://github.com/GoryMoon/StreamManipulationsExtension/wiki/Games"
     ],
     "whitelistedPanelUrls": []
   },

@@ -3,15 +3,15 @@
   data-simplebar-auto-hide="false"
   class="h-100 w-100 pb-5">
     <b-container v-if="isLoaded && !maintenance">
-      <h1 class="mt-3">Game Integrations Config</h1>
+      <h1 class="mt-3">Stream Manipulations Config</h1>
       <hr>
       <div v-if="!$twitchExtension.features.isBitsEnabled">
         <b-alert variant="danger" show>This extension requires bits to work</b-alert>
       </div>
       <p>
         Games that support this extension, download links and information on
-        how to setup the games can be found on the following page. <br/>
-        <a target="_blank" href="https://github.com/GoryMoon/StreamEngineerExtension/wiki/Games">Wiki page <fa icon="external-link-alt"></fa></a>
+        how to setup the games can be found on the following wiki page. <br/>
+        <a target="_blank" href="https://github.com/GoryMoon/StreamEngineerExtension/wiki/Games">Games <fa icon="external-link-alt"></fa></a>
       </p>
       <config-token></config-token>
       <config-actions></config-actions>
