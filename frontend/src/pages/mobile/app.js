@@ -15,7 +15,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-
 import App from '@/pages/component/app.vue';
 import router from '@/routers/router';
 import store from '@/stores/store';
@@ -26,16 +25,16 @@ Vue.config.devtools = process.env.NODE_ENV === 'development';
 const bugsnagClient = bugsnag({
   apiKey: '132bdbeb27fb56546d9529e9000eda79',
   collectUserIp: false,
-  autoNotify: process.env.NODE_ENV === 'production',
+  autoNotify: (process.env.NODE_ENV !== 'development'),
 });
 bugsnagClient.use(bugsnagVue, Vue);
 Vue.prototype.$bugsnag = bugsnagClient;
 
 let URL;
-if (process.env.NODE_ENV === 'development') {
-  URL = 'http://localhost:3000/v2/';
+if (process.env.NODE_ENV !== 'development') {
+  URL = 'https://smapi.gorymoon.se/v2/';
 } else {
-  URL = 'https://seapi.gorymoon.se/v2/';
+  URL = 'http://localhost:3000/v2/';
 }
 
 library.add(faAngleLeft);

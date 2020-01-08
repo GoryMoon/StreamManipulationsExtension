@@ -83,8 +83,10 @@ async function getGameData(req, res) {
 
     try {
         const game = await Game.findOne({ game: req.params.name })
-        if (_isNil(game.data) || game.data.length <= 0) {
+        if (_isNil(game)) {
             return res.status(404).type('json').json({status: 'game_not_found'})
+        } else if (_isNil(game.data) || game.data.length <= 0) {
+            return res.type('json').json({data: []})
         }
 
         res.type('json').json({data: game.data})
@@ -100,7 +102,7 @@ async function getGameActions(req, res) {
 
     try {
         const config = await Config.findOne({ channel_id: req.jwt.channel_id, game: req.params.game})
-        if (config == null || _isNil(config.config) || config.config.length <= 0) {
+        if (_isNil(config) || _isNil(config.config) || config.config.length <= 0) {
             return res.type('json').json({data: []})
         }
 

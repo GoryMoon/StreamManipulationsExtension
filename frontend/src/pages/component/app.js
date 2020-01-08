@@ -32,7 +32,7 @@ Vue.prototype.$bugsnag = bugsnagClient;
 
 let URL;
 if (process.env.NODE_ENV !== 'development') {
-  URL = 'https://seapi.gorymoon.se/v2/';
+  URL = 'https://smapi.gorymoon.se/v2/';
 } else {
   URL = 'http://localhost:3000/v2/';
 }

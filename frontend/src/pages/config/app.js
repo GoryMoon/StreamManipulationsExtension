@@ -37,7 +37,7 @@ let URL;
 if (process.env.NODE_ENV === 'development') {
   URL = 'http://localhost:3000/v2/';
 } else {
-  URL = 'https://seapi.gorymoon.se/v2/';
+  URL = 'https://smapi.gorymoon.se/v2/';
 }
 
 library.add(faExternalLinkAlt, faEyeSlash, faEye, faChevronDown, faChevronUp, faCheck,
