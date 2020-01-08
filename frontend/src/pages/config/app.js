@@ -28,7 +28,8 @@ Vue.config.devtools = process.env.NODE_ENV === 'development';
 const bugsnagClient = bugsnag({
   apiKey: '132bdbeb27fb56546d9529e9000eda79',
   collectUserIp: false,
-  autoNotify: process.env.NODE_ENV === 'production',
+  autoNotify: (process.env.NODE_ENV !== 'development'),
+  appVersion: '1.0.3',
 });
 bugsnagClient.use(bugsnagVue, Vue);
 Vue.prototype.$bugsnag = bugsnagClient;
