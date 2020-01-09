@@ -115,7 +115,6 @@ export default {
       }
     },
     transactionCancelled() {
-      this.loadingBitsModal = false;
       this.$store.commit(SET_ANONYMOUS_SENDER, false);
       this.$store.commit(SET_TRANSACTION_STATUS, false);
     },
@@ -143,13 +142,14 @@ export default {
       && this.$twitchExtension.viewer.initialized;
     },
     isLoadingBits() {
-      return this.selectedAction !== null && this.sendingActionModal;
+      return this.selectedAction !== null && this.transactionStatus;
     },
     ...mapState([
       'loaded',
       'maintenance',
       'activeGame',
       'selectedAction',
+      'transactionStatus',
     ]),
   },
   beforeUpdate() {
