@@ -19,8 +19,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-import App from './app.vue';
 import store from '@/stores/store';
+import App from './app.vue';
 import '@/assets/config.scss';
 
 Vue.config.productionTip = false;
