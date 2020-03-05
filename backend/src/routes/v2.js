@@ -47,6 +47,8 @@ function postGameActions(req, res) {
                                     actions: !fetch ? req.body.config: []
                                 })
                                 sendConfig(channel_id, !fetch ? req.body.config: [], 'broadcaster', '1.1')
+                            } else {
+                                sendConfig(channel_id, [], 'broadcaster', '1.1')
                             }
                         } catch(e) {
                             console.error(e)
