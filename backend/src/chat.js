@@ -40,7 +40,7 @@ function connectToChannels(channels, channel_names) {
                     })
                 } else {
                     client.part(channel).then((data) => {
-                        channel.delete(id)
+                        channels.delete(id)
                         console.log("left channel: " + data)
                     })
                 }
