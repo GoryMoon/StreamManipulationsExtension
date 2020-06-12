@@ -15,6 +15,12 @@
         </b-card-text>
         <b-button to="actions" variant="outline-info">View Actions</b-button>
       </b-card>
+      <b-card title="Channel Points" style="max-width: 30rem;">
+        <b-card-text>
+          Here you can get the channel points to use in the events file
+        </b-card-text>
+        <b-button to="channel_points" variant="outline-info">View Channel Points</b-button>
+      </b-card>
     </b-card-group>
     <div v-else>
       <p>You need to login to start monitor actions</p>

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import Queue from 'smart-request-balancer';
-import querystring from 'querystring';
 
 const TWITCH_SECRET = Buffer.from(process.env.TWITCH_SECRET, 'base64')
 const queue = new Queue({

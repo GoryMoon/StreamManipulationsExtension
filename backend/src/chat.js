@@ -32,15 +32,14 @@ function connectToChannels(channels, channel_names) {
     const chatStatusListener = (channel_id, channel, status) => {
         User.updateOne({channel_id: channel_id}, {channel_name: channel, connect_bot: status}).then((result) => {
             if (result != undefined) {
-                let id = channels.get(channel.substring(1))
                 if (status) {
                     client.join(channel).then((data) => {
-                        channels.set(id, channel_id)
+                        channels.set(channel, channel_id)
                         console.log("joined channel: " + data)
                     })
                 } else {
                     client.part(channel).then((data) => {
-                        channels.delete(id)
+                        channels.delete(channel)
                         console.log("left channel: " + data)
                     })
                 }

@@ -1,6 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import uuid from 'uuid/v4';
+import { v4 as uuid} from 'uuid';
 import TwitchEbsTools from 'twitch-ebs-tools';
 import _isEqual from 'lodash.isequal';
 import _isNil from 'lodash.isnil';

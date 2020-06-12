@@ -1,14 +1,13 @@
 import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import passportTwitch from 'passport-twitch.js';
+import { Strategy as TwitchStrategy } from 'passport-twitch.js';
 import history from 'connect-history-api-fallback';
 import jwt from 'jsonwebtoken';
 import cloneDeep from 'lodash.clonedeep';
 
 import User from '../models/user.model'
 
-let TwitchStrategy = passportTwitch.Strategy;
 var router = express.Router();
 
 const SECRET = Buffer.from(process.env.SECRET, 'base64').toString()
