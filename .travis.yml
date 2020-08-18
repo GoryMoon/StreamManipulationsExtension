@@ -3,14 +3,14 @@ node_js:
  - "12"
 cache: yarn
 before_script:
- - cd frontend
+ - cd $TRAVIS_BUILD_DIR/frontend
  - yarn install
- - cd ../backend
+ - cd $TRAVIS_BUILD_DIR/backend
  - yarn install
 script:
- - cd /frontend
+ - cd $TRAVIS_BUILD_DIR/frontend
  - yarn run build
- - cd /backend
+ - cd $TRAVIS_BUILD_DIR/backend
  - yarn run build
 after_success:
  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
