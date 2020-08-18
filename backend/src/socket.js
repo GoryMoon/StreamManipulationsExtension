@@ -19,7 +19,8 @@ export default function (server) {
     io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }))
 
     const middleware = (socket, next) => {
-        console.log(`Connection from ${socket.handshake.address}`)
+        console.log(`Connection from `);
+        console.log(socket.handshake.header);
         const token = socket.handshake.query.token;
         if (_isNil(token)) {
             console.log('Authentication error: Token was nil');
@@ -36,6 +37,7 @@ export default function (server) {
             User.findOne({channel_id: data.channel_id, token: data.token }).then(result => {
                 if (!_isNil(result)) {
                     socket.jwt = data
+                    console.log("Connection successful");
                     next()
                 } else {
                     console.log(`Authentication error: Couldn't find user with id ${data.channel_id}`);
@@ -175,6 +177,7 @@ export default function (server) {
     v2.use(middleware)
     v2.on('connection', (socket) => {
         const data = socket.jwt
+        console.log(`Connected to ${data.channeld_id}`);
 
         const changeGame = (game) => {
             if (_isNil(game) || game === '') {
