@@ -20,7 +20,7 @@ export default function (server) {
 
     const middleware = (socket, next) => {
         console.log(`Connection from `);
-        console.log(socket.handshake.header);
+        console.log(socket.handshake.headers['x-forwarded-for']);
         const token = socket.handshake.query.token;
         if (_isNil(token)) {
             console.log('Authentication error: Token was nil');
@@ -177,7 +177,7 @@ export default function (server) {
     v2.use(middleware)
     v2.on('connection', (socket) => {
         const data = socket.jwt
-        console.log(`Connected to ${data.channeld_id}`);
+        console.log(`Connected to ${data.channel_id}`);
 
         const changeGame = (game) => {
             if (_isNil(game) || game === '') {
