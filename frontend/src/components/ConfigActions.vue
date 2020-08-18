@@ -136,7 +136,6 @@
       </b-card-body>
     </b-collapse>
 
-
     <b-modal
     ref="add_action_modal"
     v-model="modalShow"
@@ -252,7 +251,6 @@ import {
 } from '@/stores/mutation-types';
 import InputComponent from './InputComponent.vue';
 import BitsDisplay from './BitsDisplay.vue';
-
 
 export default {
   name: 'config-actions',

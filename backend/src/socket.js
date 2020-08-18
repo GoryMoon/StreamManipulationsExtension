@@ -19,8 +19,7 @@ export default function (server) {
     io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }))
 
     const middleware = (socket, next) => {
-        console.log(`Connection from `);
-        console.log(socket.handshake.headers['x-forwarded-for']);
+        console.log(`Connection from ${socket.handshake.headers['x-forwarded-for']}`);
         const token = socket.handshake.query.token;
         if (_isNil(token)) {
             console.log('Authentication error: Token was nil');
