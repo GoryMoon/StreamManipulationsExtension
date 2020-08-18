@@ -19,14 +19,17 @@ export default function (server) {
     io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }))
 
     const middleware = (socket, next) => {
+        console.log(`Connection from ${socket.handshake.address}`)
         const token = socket.handshake.query.token;
         if (_isNil(token)) {
+            console.log('Authentication error: Token was nil');
             return next(new Error('Authentication error'))
         } else {
             let data;
             try {
                 data = jwt.verify(token, SECRET)
             } catch (err) {
+                console.log(`Authentication error: Failed to verify token ${token}`);
                 return next(new Error('Authentication error'))
             }
 
@@ -35,6 +38,7 @@ export default function (server) {
                     socket.jwt = data
                     next()
                 } else {
+                    console.log(`Authentication error: Couldn't find user with id ${data.channel_id}`);
                     next(new Error('Authentication error'))
                 }
             })
@@ -175,42 +179,42 @@ export default function (server) {
         const changeGame = (game) => {
             if (_isNil(game) || game === '') {
                 unload(data.channel_id)
-            } else {
-                Game.findOne({ game }).then((response, err) => {
-                    if (_isNil(err) && !_isNil(response)) {
-                        User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true })
-                            .then((_res, err) => {
-                                if (_isNil(err)) {
-                                    Config.findOne({ channel_id: data.channel_id, game}).then((res, err) => {
-                                        if (_isNil(err)) {
-                                            const fetch = 
-                                                _isNil(err) || _isNil(res) || _isNil(res.config) ? 
-                                                    false: 
-                                                    (new TextEncoder().encode(JSON.stringify(res.config))).length > 4500;
-                                            sendPubSub(data.channel_id, {
-                                                type: 'load',
-                                                game,
-                                                fetch,
-                                                actions: !fetch ? (_isNil(res) || _isNil(res.config) ? []: res.config): []
-                                            })
-                                            sendConfig(data.channel_id, {
-                                                game,
-                                                fetch
-                                            }, 'developer', '1.1')
-                                            if (!fetch && !_isNil(res) && !_isNil(res.config)) {
-                                                sendConfig(data.channel_id, res.config, 'broadcaster', '1.1')
-                                            }
-                                            events.emit('connection-' + data.channel_id, true)
-                                        }
-                                    })
-                                }
-                            })
-                    } else {
-                        socket.error('Game not valid')
-                        socket.disconnect(true)
-                    }
-                })
+                return;
             }
+            Game.findOne({ game }).then((response, err) => {
+                if (!(_isNil(err) && !_isNil(response))) {
+                    socket.error('Game not valid')
+                    socket.disconnect(true)
+                    return;
+                }
+
+                User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true }).then((_res, err) => {
+                    if (!_isNil(err)) return;
+
+                    Config.findOne({ channel_id: data.channel_id, game}).then((res, err) => {
+                        if (!_isNil(err)) return;
+
+                        const fetch = 
+                            _isNil(err) || _isNil(res) || _isNil(res.config) ? 
+                                false: 
+                                (new TextEncoder().encode(JSON.stringify(res.config))).length > 4500;
+                        sendPubSub(data.channel_id, {
+                            type: 'load',
+                            game,
+                            fetch,
+                            actions: !fetch ? (_isNil(res) || _isNil(res.config) ? []: res.config): []
+                        })
+                        sendConfig(data.channel_id, {
+                            game,
+                            fetch
+                        }, 'developer', '1.1')
+                        if (!fetch && !_isNil(res) && !_isNil(res.config)) {
+                            sendConfig(data.channel_id, res.config, 'broadcaster', '1.1')
+                        }
+                        events.emit('connection-' + data.channel_id, true)
+                    })
+                })
+            })
         }
 
         const game = socket.handshake.query.game

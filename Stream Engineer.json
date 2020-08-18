@@ -25,7 +25,8 @@
       "frameSize": {
         "width": 1280,
         "height": 720
-      }
+      },
+      "viewerType": "Broadcaster"
     },
     {
       "id": "2",
@@ -48,7 +49,8 @@
       "frameSize": {
         "width": 1280,
         "height": 720
-      }
+      },
+      "viewerType": "Broadcaster"
     }
   ],
   "manifest": {
@@ -57,7 +59,7 @@
     "authorName": "GoryMoon",
     "bitsEnabled": true,
     "canInstall": true,
-    "configUrl": "http://localhost:8081/config.html",
+    "configUrl": "https://fk8z6ixu2azx334h30y13zqf6vgaus.ext-twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/56227e4a9154c7bc19237941c548b949/config.html",
     "configurationLocation": "hosted",
     "description": "Viewers can use bits to send pre-configured actions to the broadcasters game. \nThis extension supports multiple games, all supported ones can be found here https://github.com/GoryMoon/StreamManipulationsExtension/wiki/Games\n\nThis was originally made for Space Engineers, it has been updated to work with more games.\nSome examples of what you can do with Space Engineers are:\n* Send meteors onto the broadcasters base\n* Turn off their vehicle when they least expect it\n* Refill their energy in their ship when they are stranded in space.",
     "eulaTosUrl": "",
@@ -83,7 +85,7 @@
       "https://extensions-discovery-images.twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/screenshot7a7c4d6a-d058-4bd0-85ce-eafd3b15904b"
     ],
     "sku": "",
-    "state": "Testing",
+    "state": "Released",
     "subscriptionsSupportLevel": "none",
     "summary": "This extension allows the viewers to send bits to trigger events in the broadcasters game. Formerly Stream Engineer.",
     "supportEmail": "contact@gorymoon.se",
@@ -92,29 +94,29 @@
     "viewerSummary": "Allows viewers to send bits to trigger events in supported games",
     "viewerUrl": "",
     "viewerUrls": {
-      "mobile": "http://localhost:8081/mobile.html",
-      "component": "http://localhost:8081/component.html"
+      "mobile": "https://fk8z6ixu2azx334h30y13zqf6vgaus.ext-twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/56227e4a9154c7bc19237941c548b949/mobile.html",
+      "component": "https://fk8z6ixu2azx334h30y13zqf6vgaus.ext-twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/56227e4a9154c7bc19237941c548b949/component.html"
     },
     "views": {
       "mobile": {
-        "viewerUrl": "http://localhost:8081/mobile.html"
+        "viewerUrl": "https://fk8z6ixu2azx334h30y13zqf6vgaus.ext-twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/56227e4a9154c7bc19237941c548b949/mobile.html"
       },
       "component": {
-        "viewerUrl": "http://localhost:8081/component.html",
+        "viewerUrl": "https://fk8z6ixu2azx334h30y13zqf6vgaus.ext-twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/56227e4a9154c7bc19237941c548b949/component.html",
         "aspectWidth": 0,
         "aspectHeight": 0,
         "aspectRatioX": 900,
         "aspectRatioY": 1000,
-        "autoscale": true,
         "scalePixels": 550,
         "targetHeight": 7000,
         "size": 0,
         "zoom": false,
         "zoomPixels": 0,
-        "canLinkExternalContent": false
+        "canLinkExternalContent": false,
+        "autoScale": true
       },
       "config": {
-        "viewerUrl": "http://localhost:8081/config.html",
+        "viewerUrl": "https://fk8z6ixu2azx334h30y13zqf6vgaus.ext-twitch.tv/fk8z6ixu2azx334h30y13zqf6vgaus/1.0.3/56227e4a9154c7bc19237941c548b949/config.html",
         "canLinkExternalContent": true
       }
     },
@@ -126,5 +128,5 @@
   "frontendCommand": "yarn serve",
   "frontendFolderName": "frontend",
   "name": "Stream Engineer",
-  "version": 1
+  "version": 2
 }
