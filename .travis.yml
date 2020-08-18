@@ -1,12 +1,17 @@
 language: node_js
 node_js:
- - "10"
-cache: npm
+ - "12"
+cache: yarn
 before_script:
  - cd frontend
- - npm install
+ - yarn install
+ - cd ../backend
+ - yarn install
 script:
- - npm run build
+ - cd /frontend
+ - yarn run build
+ - cd /backend
+ - yarn run build
 after_success:
  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
  - chmod +x send.sh
