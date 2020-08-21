@@ -90,7 +90,7 @@ function sendConfig(channel_id, content, segment, version) {
         )
         .then(response => response.data)
         .catch(error => {
-            if (error.response.status === 429) {
+            if (error.response.status === 429 || (error.response.status === 409 && error.response.data.message === 'Concurrency failure: please retry')) {
                 return retry()
             }
             throw error

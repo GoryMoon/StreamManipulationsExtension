@@ -55,8 +55,10 @@ function connectToChannels(channels, channel_names) {
     
     client.on('message', (channel, userstate, message, self) => {
         if ('custom-reward-id' in userstate) {
+            console.log(`Checking if id is in list: ${channel}`)
             let id = channels.get(channel.substring(1))
             if (id !== undefined) {
+                console.log(`Emitting channel point reward for channel: ${channel}`)
                 events.emit('cp-' + id, {
                     user: userstate['display-name'],
                     message: message,
