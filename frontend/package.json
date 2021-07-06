@@ -24,7 +24,7 @@
     "bootstrap-vue": "^2.16.0",
     "core-js": "^3.6.5",
     "glob": "^7.1.6",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "simplebar": "^5.2.1",
     "simplebar-vue": "^1.5.1",
     "twitchext-vuex": "^0.2.2",
