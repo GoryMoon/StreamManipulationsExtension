@@ -1,8 +1,7 @@
-import IO from 'socket.io'
-import redisAdapter from 'socket.io-redis';
+import {Server} from 'socket.io'
 import jwt from 'jsonwebtoken';
-import _pick from 'lodash.pick'
-import _isNil from 'lodash.isnil'
+import _pick from 'lodash/pick'
+import _isNil from 'lodash/isNil'
 
 import User from './models/user.model';
 import Game from './models/game.model';
@@ -10,17 +9,16 @@ import Config from './models/config.model';
 import Action from './models/action.model';
 import events from './events';
 
-import { sendConfig, sendPubSub } from './twitch';
+import Twitch from './twitch';
 
-const SECRET = Buffer.from(process.env.SECRET, 'base64')
+export default function () {
+    const twitch = new Twitch()
+    const SECRET = Buffer.from(process.env.SECRET, 'base64')
 
-export default function (server) {
-    const io = IO(server);
-    io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }, null))
-
+    const io = new Server();
     const middleware = (socket, next) => {
         console.log(`Connection from ${socket.handshake.headers['x-forwarded-for']}`);
-        const token = socket.handshake.query.token;
+        const token = socket.handshake.query['token'];
         if (_isNil(token)) {
             console.log('Authentication error: Token was nil');
             return next(new Error('Authentication error'))
@@ -33,7 +31,7 @@ export default function (server) {
                 return next(new Error('Authentication error'))
             }
 
-            User.findOne({channel_id: data.channel_id, token: data.token }).then(result => {
+            User.findOne({channel_id: data.channel_id, token: data.token}).then(result => {
                 if (!_isNil(result)) {
                     socket.jwt = data
                     console.log("Connection successful");
@@ -52,17 +50,17 @@ export default function (server) {
         const data = socket.jwt
         sendActions(socket, data.channel_id, 0)
 
-        User.findOne({ channel_id: data.channel_id }).then((result, err) => {
+        User.findOne({channel_id: data.channel_id}).then((result, err) => {
             socket.emit('update_game_connection', result.socket_id !== null)
             socket.emit('update_chat_status', 'connect_bot' in result && result.connect_bot === true)
         })
 
-        Config.findOne({ channel_id: data.channel_id }).then((result, err) => {
+        Config.findOne({channel_id: data.channel_id}).then((result, err) => {
             socket.emit('config', result.config)
         })
 
         const actionListener = (action) => {
-            socket.emit('action', _pick(action, [ '_id', 'action', 'bits', 'sender', 'game', 'createdAt' ]))
+            socket.emit('action', _pick(action, ['_id', 'action', 'bits', 'sender', 'game', 'createdAt']))
         }
         const connectionListener = (value) => {
             socket.emit('update_game_connection', value)
@@ -107,9 +105,9 @@ export default function (server) {
     })
 
     function sendActions(socket, channel_id, offset) {
-        Action.find({ channel_id: channel_id },
-            [ '_id', 'action', 'bits', 'sender', 'game', 'createdAt' ],
-            { limit: 50, sort: { createdAt: -1 }, skip: offset }).then((result, err) => {
+        Action.find({channel_id: channel_id},
+            ['_id', 'action', 'bits', 'sender', 'game', 'createdAt'],
+            {limit: 50, sort: {createdAt: -1}, skip: offset}).then((result, err) => {
             if (!_isNil(result)) {
                 socket.emit('connect_actions', result)
             }
@@ -117,17 +115,20 @@ export default function (server) {
     }
 
 
-    var v1 = io.of('/v1');
+    const v1 = io.of('/v1');
     v1.use(middleware)
     v1.on('connection', (socket) => {
         const data = socket.jwt
-        User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true }).then((res, err) => {
+        User.updateOne({
+            channel_id: data.channel_id,
+            token: data.token
+        }, {socket_id: socket.id}, {upsert: true}).then((res, err) => {
             if (_isNil(err)) {
                 events.emit('connection-' + data.channel_id, true)
-                sendPubSub(data.channel_id, {
+                twitch.sendPubSub(data.channel_id, {
                     mod_active: true
                 })
-                sendConfig(data.channel_id, { mod_active: true }, 'developer', '1.0')
+                twitch.sendConfig(data.channel_id, {mod_active: true}, 'developer', '1.0')
             }
         })
 
@@ -137,7 +138,7 @@ export default function (server) {
                 for (let [key, value] of Object.entries(action.config)) {
                     try {
                         settings[key] = JSON.parse(value)
-                    } catch(error) {
+                    } catch (error) {
                         settings[key] = value
                     }
                 }
@@ -159,20 +160,20 @@ export default function (server) {
         events.on('cp-' + data.channel_id, cpListener)
 
         socket.on('disconnect', () => {
-            User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: null })
-            .then((_res, _err) => {
-                events.emit('connection-' + data.channel_id, false)
-                events.removeListener('run-' + data.channel_id, replayListener)
-                events.removeListener('cp-' + data.channel_id, cpListener)
-                sendPubSub(data.channel_id, {
-                    mod_active: false
+            User.updateOne({channel_id: data.channel_id, token: data.token}, {socket_id: null})
+                .then((_res, _err) => {
+                    events.emit('connection-' + data.channel_id, false)
+                    events.removeListener('run-' + data.channel_id, replayListener)
+                    events.removeListener('cp-' + data.channel_id, cpListener)
+                    twitch.sendPubSub(data.channel_id, {
+                        mod_active: false
+                    })
+                    twitch.sendConfig(data.channel_id, {mod_active: false}, 'developer', '1.0')
                 })
-                sendConfig(data.channel_id, { mod_active: false }, 'developer', '1.0')
-            })
         })
     })
 
-    var v2 = io.of('/v2');
+    const v2 = io.of('/v2');
     v2.use(middleware)
     v2.on('connection', (socket) => {
         const data = socket.jwt
@@ -183,35 +184,38 @@ export default function (server) {
                 unload(data.channel_id)
                 return;
             }
-            Game.findOne({ game }).then((response, err) => {
+            Game.findOne({game}).then((response, err) => {
                 if (!(_isNil(err) && !_isNil(response))) {
                     socket.error('Game not valid')
                     socket.disconnect(true)
                     return;
                 }
 
-                User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: socket.id }, { upsert: true }).then((_res, err) => {
+                User.updateOne({
+                    channel_id: data.channel_id,
+                    token: data.token
+                }, {socket_id: socket.id}, {upsert: true}).then((_res, err) => {
                     if (!_isNil(err)) return;
 
-                    Config.findOne({ channel_id: data.channel_id, game}).then((res, err) => {
+                    Config.findOne({channel_id: data.channel_id, game}).then((res, err) => {
                         if (!_isNil(err)) return;
 
                         const fetch =
                             _isNil(err) || _isNil(res) || _isNil(res.config) ?
-                                false:
+                                false :
                                 (new TextEncoder().encode(JSON.stringify(res.config))).length > 4500;
-                        sendPubSub(data.channel_id, {
+                        twitch.sendPubSub(data.channel_id, {
                             type: 'load',
                             game,
                             fetch,
-                            actions: !fetch ? (_isNil(res) || _isNil(res.config) ? []: res.config): []
+                            actions: !fetch ? (_isNil(res) || _isNil(res.config) ? [] : res.config) : []
                         })
-                        sendConfig(data.channel_id, {
+                        twitch.sendConfig(data.channel_id, {
                             game,
                             fetch
                         }, 'developer', '1.1')
                         if (!fetch && !_isNil(res) && !_isNil(res.config)) {
-                            sendConfig(data.channel_id, res.config, 'broadcaster', '1.1')
+                            twitch.sendConfig(data.channel_id, res.config, 'broadcaster', '1.1')
                         }
                         events.emit('connection-' + data.channel_id, true)
                     })
@@ -230,7 +234,7 @@ export default function (server) {
                 for (let [key, value] of Object.entries(action.config)) {
                     try {
                         settings[key] = JSON.parse(value)
-                    } catch(error) {
+                    } catch (error) {
                         settings[key] = value
                     }
                 }
@@ -253,14 +257,14 @@ export default function (server) {
             events.emit('connection-' + channel_id, false)
             events.removeListener('run-' + channel_id, replayListener)
             events.removeListener('cp-' + channel_id, cpListener)
-            sendPubSub(channel_id, {
+            twitch.sendPubSub(channel_id, {
                 type: 'unload'
             })
-            sendConfig(channel_id, {
+            twitch.sendConfig(channel_id, {
                 game: '',
                 fetch: false,
             }, 'developer', '1.1')
-            sendConfig(channel_id, [], 'broadcaster', '1.1')
+            twitch.sendConfig(channel_id, [], 'broadcaster', '1.1')
         }
 
         events.on('run-' + data.channel_id, replayListener)
@@ -269,10 +273,10 @@ export default function (server) {
         socket.on('game', changeGame)
 
         socket.on('disconnect', () => {
-            User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null })
-            .then((_res, _err) => {
-                unload(data.channel_id)
-            })
+            User.updateOne({channel_id: data.channel_id, token: data.token}, {socket_id: null})
+                .then((_res, _err) => {
+                    unload(data.channel_id)
+                })
         })
     })
 

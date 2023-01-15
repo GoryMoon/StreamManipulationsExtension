@@ -1,10 +1,9 @@
-
 import User from './models/user.model';
-const tmi = require('tmi.js');
+import {Client} from 'tmi.js';
 
 import events from './events';
 
-console.log('Starting chatbot')
+console.log('[Chat] Starting chatbot')
 User.find({}).then((result) => {
     const channels = new Map();
     const channel_names = [];
@@ -19,8 +18,8 @@ User.find({}).then((result) => {
 })
 
 function connectToChannels(channels, channel_names) {
-    console.log(`Connecting to ${channel_names.toString()}`)
-    const client = new tmi.Client({
+    console.log(`[Chat] Connecting to '${channel_names.toString()}'`)
+    const client = new Client({
         connection: {
             secure: true,
             reconnect: true

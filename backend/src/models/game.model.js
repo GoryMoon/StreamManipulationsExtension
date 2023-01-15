@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
-import db from '../db'
+
+const {Schema} = mongoose;
 
 const schema = new Schema({
     game: String,
@@ -9,4 +9,4 @@ const schema = new Schema({
     data: Schema.Types.Mixed
 })
 
-export default db.model('Game', schema)
+export default mongoose.model('Game', schema)

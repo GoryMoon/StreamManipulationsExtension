@@ -1,11 +1,9 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { v4 as uuid} from 'uuid';
-import { TwitchEbsTools } from 'twitch-ebs-tools';
-import _isEqual from 'lodash.isequal';
-import _isNil from 'lodash.isnil';
-import emitter from 'socket.io-emitter';
-const io = emitter({ host: process.env.REDIS, port: process.env.REDIS_PORT }, null)
+import {v4 as uuid} from 'uuid';
+import {TwitchEbsTools} from 'twitch-ebs-tools';
+import _isEqual from 'lodash/isEqual';
+import _isNil from 'lodash/isNil';
 
 import User from '../models/user.model'
 import Config from '../models/config.model';
@@ -13,8 +11,6 @@ import Game from '../models/game.model';
 import Stat from '../models/stat.model';
 import Action from '../models/action.model';
 import events from '../events';
-
-const SECRET = Buffer.from(process.env.SECRET, 'base64').toString()
 
 function auth(req, res, next) {
     if (req.headers['authorization']) {
@@ -41,7 +37,7 @@ function auth(req, res, next) {
 
 function token(req, res) {
     if (TwitchEbsTools.verifyRole(req.jwt, 'broadcaster')) {
-        User.findOne({ channel_id: req.jwt.channel_id }).then(result => {
+        User.findOne({channel_id: req.jwt.channel_id}).then(result => {
             if (!_isNil(result)) {
                 return res.type('json').json({token: generateJWT(req.jwt.channel_id, result.token), dev: result.dev})
             } else {
@@ -67,12 +63,16 @@ function createToken(req, res) {
 
 function newToken(channel_id) {
     const token = uuid()
-    return User.updateOne({ channel_id: channel_id }, { token: token }, { upsert: true, setDefaultsOnInsert: true }).then(_result => {
+    return User.updateOne({channel_id: channel_id}, {token: token}, {
+        upsert: true,
+        setDefaultsOnInsert: true
+    }).then(_result => {
         return generateJWT(channel_id, token)
     })
 }
 
 function generateJWT(id, token) {
+    const SECRET = Buffer.from(process.env.SECRET, 'base64').toString()
     return jwt.sign({channel_id: id, token: token}, SECRET, {noTimestamp: true}, null)
 }
 
@@ -82,7 +82,7 @@ async function getGameData(req, res) {
     }
 
     try {
-        const game = await Game.findOne({ game: req.params.name })
+        const game = await Game.findOne({game: req.params.name})
         if (_isNil(game)) {
             return res.status(404).type('json').json({status: 'game_not_found'})
         } else if (_isNil(game.data) || game.data.length <= 0) {
@@ -101,7 +101,7 @@ async function getGameActions(req, res) {
     }
 
     try {
-        const config = await Config.findOne({ channel_id: req.jwt.channel_id, game: req.params.game})
+        const config = await Config.findOne({channel_id: req.jwt.channel_id, game: req.params.game})
         if (_isNil(config) || _isNil(config.config) || config.config.length <= 0) {
             return res.type('json').json({data: []})
         }
@@ -117,15 +117,15 @@ function postGameActions(req, res) {
         return res.status(401).type('json').json({status: 'not_valid'})
     }
     Config.updateOne(
-        { channel_id: req.jwt.channel_id, game: req.params.game },
-        { channel_id: req.jwt.channel_id, game: req.params.game, config: req.body.config },
-        { upsert: true })
+        {channel_id: req.jwt.channel_id, game: req.params.game},
+        {channel_id: req.jwt.channel_id, game: req.params.game, config: req.body.config},
+        {upsert: true})
         .then(result => {
             res.type('json').json({status: 'saved'})
         })
 }
 
-function sendAction(socketVersion) {
+function sendAction(io, socketVersion) {
     return async (req, res) => {
         const token = req.body.token;
 
@@ -139,13 +139,13 @@ function sendAction(socketVersion) {
                     return res.status(401).type('json').json({status: 'bits_not_valid'})
                 }
                 product = bitPayload.data.product;
-            } catch(err) {
+            } catch (err) {
                 return res.status(401).type('json').json({status: 'bits_not_valid'})
             }
         }
 
         try {
-            const config = await Config.findOne({ channel_id: req.jwt.channel_id, game: req.params.game })
+            const config = await Config.findOne({channel_id: req.jwt.channel_id, game: req.params.game})
             if (_isNil(config.config) || config.config.length <= 0) {
                 return res.status(401).type('json').json({status: 'config_not_valid'})
             }
@@ -169,21 +169,21 @@ function sendAction(socketVersion) {
                     bits: product.cost.amount,
                     sender: req.body.user,
                     action: action.action,
-                    config: { message: action.message, ...action.settings }
+                    config: {message: action.message, ...action.settings}
                 })
                 events.emit('action-' + req.jwt.channel_id, result)
             } catch (error) {
                 console.error('Could not save an action to disk: ' + req.body.action + ' - ' + JSON.stringify(req.body.settings))
             }
 
-            User.findOne({ channel_id: req.jwt.channel_id }).then(result => {
+            User.findOne({channel_id: req.jwt.channel_id}).then(result => {
                 if (!_isNil(result) && result.socket_id !== null) {
                     let settings = {}
                     if (!_isNil(action.settings)) {
                         for (let [key, value] of Object.entries(action.settings)) {
                             try {
                                 settings[key] = JSON.parse(value)
-                            } catch(error) {
+                            } catch (error) {
                                 settings[key] = value
                             }
                         }
@@ -193,11 +193,14 @@ function sendAction(socketVersion) {
                         bits: product.cost.amount,
                         user: req.body.user,
                         action: action.action,
-                        settings: { message: action.message, ...settings }
+                        settings: {message: action.message, ...settings}
                     })
                     const incObj = {};
                     incObj['metrics.' + action.action] = 1
-                    Stat.updateOne({ channel_id: req.jwt.channel_id, game: req.params.game }, { $inc:incObj }, { upsert: true }).then((_result, _err) => {
+                    Stat.updateOne({
+                        channel_id: req.jwt.channel_id,
+                        game: req.params.game
+                    }, {$inc: incObj}, {upsert: true}).then((_result, _err) => {
                         res.type('json').json({status: 'sent'})
                     })
                 } else {
@@ -209,25 +212,29 @@ function sendAction(socketVersion) {
         }
     }
 }
-var router = express.Router();
 
-router.use(auth)
+function setup(io) {
+    const router = express.Router();
 
-//Token
-router.get('/token/', token)
-router.get('/token/create', createToken)
+    router.use(auth)
 
-//Game
-router.get('/game/:name', getGameData)
+    //Token
+    router.get('/token/', token)
+    router.get('/token/create', createToken)
 
-//Actions
-router.get('/actions/:game', getGameActions)
-router.post('/actions/:game', postGameActions)
+    //Game
+    router.get('/game/:name', getGameData)
 
-//Action sent
-router.post('/action/:game', sendAction('v1'))
+    //Actions
+    router.get('/actions/:game', getGameActions)
+    router.post('/actions/:game', postGameActions)
+
+    //Action sent
+    router.post('/action/:game', sendAction(io, 'v1'))
+    return router
+}
 
 export {
-    router as default,
+    setup as default,
     auth, token, createToken, getGameData, getGameActions, postGameActions, sendAction
 }

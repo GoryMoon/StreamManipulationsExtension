@@ -1,16 +1,20 @@
 import mongoose from 'mongoose'
+import {ServerApiVersion} from 'mongodb'
+
 let count = 0;
 
 const connectWithRetry = () => {
-    console.log('MongoDB connection with retry')
-    mongoose.connect("mongodb://localhost:27017/stream_engineer", {autoIndex: true}).then(()=>{
-        console.log('MongoDB is connected')
+    console.log('[MongoDB] Trying to connect')
+    mongoose.set('strictQuery', false)
+    mongoose.connect(process.env.MONGO_URI, {
+        autoIndex: true,
+        serverApi: ServerApiVersion.v1,
+    }).then(() => {
+        console.log('[MongoDB] Connected')
     }).catch(err => {
-        console.log('MongoDB connection unsuccessful, retry after 5 seconds. ', ++count);
+        console.log('[MongoDB] Connection unsuccessful, retry after 5 seconds. ', ++count);
         setTimeout(connectWithRetry, 5000)
     })
 }
 
-connectWithRetry()
-
-export default mongoose
+export default connectWithRetry

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
-import db from '../db'
+
+const {Schema} = mongoose;
 
 const schema = new Schema({
     channel_id: String,
@@ -9,6 +9,6 @@ const schema = new Schema({
     sender: String,
     action: String,
     config: Schema.Types.Mixed
-}, { timestamps: true })
+}, {timestamps: true})
 
-export default db.model('Action', schema)
+export default mongoose.model('Action', schema)
