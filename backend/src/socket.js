@@ -15,8 +15,8 @@ import { sendConfig, sendPubSub } from './twitch';
 const SECRET = Buffer.from(process.env.SECRET, 'base64')
 
 export default function (server) {
-    var io = IO(server)
-    io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }))
+    const io = IO(server);
+    io.adapter(redisAdapter({ host: process.env.REDIS, port: process.env.REDIS_PORT }, null))
 
     const middleware = (socket, next) => {
         console.log(`Connection from ${socket.handshake.headers['x-forwarded-for']}`);
@@ -46,7 +46,7 @@ export default function (server) {
         }
     };
 
-    var dash = io.of('/dashboard');
+    const dash = io.of('/dashboard');
     dash.use(middleware)
     dash.on('connection', (socket) => {
         const data = socket.jwt
@@ -157,7 +157,7 @@ export default function (server) {
         }
         events.on('run-' + data.channel_id, replayListener)
         events.on('cp-' + data.channel_id, cpListener)
-        
+
         socket.on('disconnect', () => {
             User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: null })
             .then((_res, _err) => {
@@ -196,9 +196,9 @@ export default function (server) {
                     Config.findOne({ channel_id: data.channel_id, game}).then((res, err) => {
                         if (!_isNil(err)) return;
 
-                        const fetch = 
-                            _isNil(err) || _isNil(res) || _isNil(res.config) ? 
-                                false: 
+                        const fetch =
+                            _isNil(err) || _isNil(res) || _isNil(res.config) ?
+                                false:
                                 (new TextEncoder().encode(JSON.stringify(res.config))).length > 4500;
                         sendPubSub(data.channel_id, {
                             type: 'load',
@@ -267,7 +267,7 @@ export default function (server) {
         events.on('cp-' + data.channel_id, cpListener)
 
         socket.on('game', changeGame)
-        
+
         socket.on('disconnect', () => {
             User.updateOne({channel_id: data.channel_id, token: data.token }, { socket_id: null })
             .then((_res, _err) => {

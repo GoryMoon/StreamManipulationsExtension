@@ -1,6 +1,7 @@
-@import '~bootstrap';
-@import './bootswatch';
-@import '~bootstrap-vue';
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/darkly/bootswatch";
+
+@import 'bootstrap-vue-3/dist/bootstrap-vue-3.css';
 @import 'vue-select/src/scss/vue-select.scss';
 
 .v-select {

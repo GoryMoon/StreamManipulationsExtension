@@ -82,127 +82,127 @@
 </template>
 
 <script>
-import _findIndex from 'lodash/findIndex';
-import _omit from 'lodash/omit';
-import _map from 'lodash/map';
-import _cloneDeep from 'lodash/cloneDeep';
-import _find from 'lodash/find';
-import { mapState } from 'vuex';
+import _findIndex from 'lodash/findIndex'
+import _omit from 'lodash/omit'
+import _map from 'lodash/map'
+import _cloneDeep from 'lodash/cloneDeep'
+import _find from 'lodash/find'
+import { mapState } from 'vuex'
 
 export default {
-  name: 'action-input',
-  props: [
-    'value',
-    'data',
-  ],
-  components: {
-    'input-component': () => import('./InputComponent.vue'),
-  },
-  data() {
-    return {
-      id: null,
-      actions: [],
-      modalShow: false,
-      selectedData: {},
-      selectedAction: {},
-      selectedActionIndex: -1,
-      selectedInputData: null,
-    };
-  },
-  methods: {
-    addAction(action) {
-      this.selectedData = _cloneDeep(action);
-      this.selectedAction = {
-        title: this.selectedData.title,
-        description: this.selectedData.description,
-        type: this.selectedData.action,
-        weight: 0,
-      };
-      this.addMessageField();
-
-      if (this.selectedData.settings) {
-        this.selectedAction.action = {};
-        this.selectedData.settings.forEach((data) => {
-          this.selectedAction.action[data.key] = _cloneDeep(data.default);
-        });
-      }
-
-      this.modalShow = true;
-      this.selectedInputData = null;
+    name: 'action-input',
+    props: [
+        'value',
+        'data'
+    ],
+    components: {
+        'input-component': () => import('./InputComponent.vue')
     },
-    editAction(key) {
-      const index = _findIndex(this.actions, ['key', key]);
-      this.selectedAction = _cloneDeep(this.actions[index]);
-      this.selectedData = _cloneDeep(_find(this.actionData, ['action', this.selectedAction.type]));
-      this.addMessageField();
-      this.selectedActionIndex = index;
-      this.modalShow = true;
-    },
-    resetModal() {
-      this.selectedActionIndex = -1;
-    },
-    saveAction(bvModalEvt) {
-      bvModalEvt.preventDefault();
-
-      if (this.selectedActionIndex === -1) {
-        this.selectedAction.key = this.actions.length;
-        this.actions.push(this.selectedAction);
-      } else {
-        this.$set(this.actions, this.selectedActionIndex, this.selectedAction);
-      }
-
-      this.$nextTick(() => {
-        this.$refs.add_action_modal.hide();
-      });
-      this.$emit('input', this.getData);
-    },
-    removeAction(key) {
-      this.actions.splice(_findIndex(this.actions, ['key', key]), 1);
-      this.$emit('input', this.getData);
-    },
-    addMessageField() {
-      if (this.selectedData.message) {
-        if (!this.selectedData.settings) {
-          this.selectedData.settings = [];
+    data () {
+        return {
+            id: null,
+            actions: [],
+            modalShow: false,
+            selectedData: {},
+            selectedAction: {},
+            selectedActionIndex: -1,
+            selectedInputData: null
         }
-        this.selectedData.settings.unshift({
-          title: 'Message',
-          description: '(Optional) Will show in-game',
-          key: 'message',
-          type: 'text',
-          default: '',
-        });
-      }
     },
-  },
-  computed: {
-    getData() {
-      return JSON.stringify(_map(this.actions, (item) => _omit(item, ['key', 'title', 'description'])));
+    methods: {
+        addAction (action) {
+            this.selectedData = _cloneDeep(action)
+            this.selectedAction = {
+                title: this.selectedData.title,
+                description: this.selectedData.description,
+                type: this.selectedData.action,
+                weight: 0
+            }
+            this.addMessageField()
+
+            if (this.selectedData.settings) {
+                this.selectedAction.action = {}
+                this.selectedData.settings.forEach((data) => {
+                    this.selectedAction.action[data.key] = _cloneDeep(data.default)
+                })
+            }
+
+            this.modalShow = true
+            this.selectedInputData = null
+        },
+        editAction (key) {
+            const index = _findIndex(this.actions, ['key', key])
+            this.selectedAction = _cloneDeep(this.actions[index])
+            this.selectedData = _cloneDeep(_find(this.actionData, ['action', this.selectedAction.type]))
+            this.addMessageField()
+            this.selectedActionIndex = index
+            this.modalShow = true
+        },
+        resetModal () {
+            this.selectedActionIndex = -1
+        },
+        saveAction (bvModalEvt) {
+            bvModalEvt.preventDefault()
+
+            if (this.selectedActionIndex === -1) {
+                this.selectedAction.key = this.actions.length
+                this.actions.push(this.selectedAction)
+            } else {
+                this.$set(this.actions, this.selectedActionIndex, this.selectedAction)
+            }
+
+            this.$nextTick(() => {
+                this.$refs.add_action_modal.hide()
+            })
+            this.$emit('input', this.getData)
+        },
+        removeAction (key) {
+            this.actions.splice(_findIndex(this.actions, ['key', key]), 1)
+            this.$emit('input', this.getData)
+        },
+        addMessageField () {
+            if (this.selectedData.message) {
+                if (!this.selectedData.settings) {
+                    this.selectedData.settings = []
+                }
+                this.selectedData.settings.unshift({
+                    title: 'Message',
+                    description: '(Optional) Will show in-game',
+                    key: 'message',
+                    type: 'text',
+                    default: ''
+                })
+            }
+        }
     },
-    ...mapState([
-      'defaultActions',
-      'actionData',
-    ]),
-  },
-  beforeMount() {
-    this.id = Math.random().toString(36).substr(2, 9);
-  },
-  mounted() {
-    const input = this.value.length > 0 ? JSON.parse(this.value) : [];
-    let i = 0;
-    this.actions = _map(input, (action) => {
-      const data = _cloneDeep(_find(this.actionData, ['action', action.type]));
-      const key = i;
-      i += 1;
-      return ({
-        key,
-        title: data.title,
-        description: data.description,
-        ...action,
-      });
-    });
-  },
-};
+    computed: {
+        getData () {
+            return JSON.stringify(_map(this.actions, (item) => _omit(item, ['key', 'title', 'description'])))
+        },
+        ...mapState([
+            'defaultActions',
+            'actionData'
+        ])
+    },
+    beforeMount () {
+        this.id = Math.random().toString(36).substr(2, 9)
+    },
+    mounted () {
+        const input = this.value.length > 0 ? JSON.parse(this.value) : []
+        let i = 0
+        this.actions = _map(input, (action) => {
+            const data = _cloneDeep(_find(this.actionData, ['action', action.type]))
+            const key = i
+            i += 1
+            return ({
+                key,
+                title: data.title,
+                description: data.description,
+                ...action
+            })
+        })
+    }
+}
 </script>
 
 <style>

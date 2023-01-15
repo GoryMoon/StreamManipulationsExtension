@@ -3,7 +3,7 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
-import exphbs from 'express-handlebars';
+import { engine } from 'express-handlebars';
 import indexRouter from './routes/index';
 import helmet from 'helmet';
 import compress from 'compression';
@@ -19,7 +19,7 @@ app.options('*', cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.engine('handlebars', exphbs())
+app.engine('handlebars', engine())
 app.set('view engine', 'handlebars')
 app.disable('etag')
 

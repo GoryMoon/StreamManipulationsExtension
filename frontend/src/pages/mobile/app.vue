@@ -12,28 +12,28 @@
 
 <script>
 export default {
-  data() {
-    return {
-      loaded: false,
-      maintenance: false,
-    };
-  },
-  computed: {
-    isLoaded() {
-      return this.$twitchExtension.channel.initialized
-      && this.$twitchExtension.configuration.initialized
-      && this.$twitchExtension.context.initialized
-      && this.$twitchExtension.viewer.initialized;
+    data () {
+        return {
+            loaded: false,
+            maintenance: false
+        }
     },
-  },
-  beforeUpdate() {
-    if (this.isLoaded && !this.loaded) {
-      this.loaded = true;
-      const data = this.$twitchExtension.configuration.global.content;
-      this.maintenance = data !== undefined ? JSON.parse(data).maintenance : false;
+    computed: {
+        isLoaded () {
+            return this.$twitchExtension.channel.initialized &&
+      this.$twitchExtension.configuration.initialized &&
+      this.$twitchExtension.context.initialized &&
+      this.$twitchExtension.viewer.initialized
+        }
+    },
+    beforeUpdate () {
+        if (this.isLoaded && !this.loaded) {
+            this.loaded = true
+            const data = this.$twitchExtension.configuration.global.content
+            this.maintenance = data !== undefined ? JSON.parse(data).maintenance : false
+        }
     }
-  },
-};
+}
 </script>
 
 <style>

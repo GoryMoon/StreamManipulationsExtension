@@ -1,6 +1,6 @@
-import axios from 'axios';
-import jwt from 'jsonwebtoken';
-import Queue from 'smart-request-balancer';
+import axios from 'axios'
+import jwt from 'jsonwebtoken'
+import Queue from 'smart-request-balancer'
 
 const TWITCH_SECRET = Buffer.from(process.env.TWITCH_SECRET, 'base64')
 const queue = new Queue({
@@ -36,13 +36,14 @@ function sendPubSub(channel_id, message) {
         }
     }, TWITCH_SECRET, {
         expiresIn: '3m'
-    })
+    }, null)
 
     queue.request((retry) => axios
-        .post(`https://api.twitch.tv/extensions/message/${channel_id}`,
+        .post(`https://api.twitch.tv/helix/extensions/pubsub`,
         {
             content_type: 'application/json',
             message: JSON.stringify(message),
+            broadcaster_id: channel_id,
             targets: ["broadcast"]
         },{
             headers: {
@@ -66,21 +67,22 @@ function sendConfig(channel_id, content, segment, version) {
         role: 'external',
     }, TWITCH_SECRET, {
         expiresIn: '3m'
-    })
+    }, null)
 
     const body = {
-        version: version,
+        extension_id: process.env.TWITCH_CLIENT_ID,
         segment: segment,
+        version: version,
         content: JSON.stringify(content),
     }
 
     if (segment !== 'global') {
-        body['channel_id'] = channel_id;
+        body['broadcaster_id'] = channel_id
     }
 
     queue.request((retry) => axios
-        .put(`https://api.twitch.tv/extensions/${process.env.TWITCH_CLIENT_ID}/configurations`,
-            body, 
+        .put(`https://api.twitch.tv/helix/extensions/configurations`,
+            body,
             {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -104,12 +106,17 @@ function getConfig(channel_id, segment) {
         role: 'external',
     }, TWITCH_SECRET, {
         expiresIn: '3m'
-    })
+    }, null)
 
-    const params = segment === 'global' ? {}: { channel_id }
+    const params = {
+        segment: segment,
+        extension_id: process.env.TWITCH_CLIENT_ID
+    }
+    if (segment !== 'global')
+        params['broadcaster_id'] = channel_id;
 
     return queue.request((retry) => axios
-        .get(`https://api.twitch.tv/extensions/${process.env.TWITCH_CLIENT_ID}/configurations/segments/${segment}`,
+        .get(`https://api.twitch.tv/helix/extensions/configurations`,
             {
                 params,
                 headers: {

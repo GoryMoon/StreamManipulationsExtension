@@ -1,11 +1,11 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { v4 as uuid} from 'uuid';
-import TwitchEbsTools from 'twitch-ebs-tools';
+import { TwitchEbsTools } from 'twitch-ebs-tools';
 import _isEqual from 'lodash.isequal';
 import _isNil from 'lodash.isnil';
 import emitter from 'socket.io-emitter';
-const io = emitter({ host: process.env.REDIS, port: process.env.REDIS_PORT })
+const io = emitter({ host: process.env.REDIS, port: process.env.REDIS_PORT }, null)
 
 import User from '../models/user.model'
 import Config from '../models/config.model';
@@ -73,7 +73,7 @@ function newToken(channel_id) {
 }
 
 function generateJWT(id, token) {
-    return jwt.sign({channel_id: id, token: token}, SECRET, {noTimestamp: true})
+    return jwt.sign({channel_id: id, token: token}, SECRET, {noTimestamp: true}, null)
 }
 
 async function getGameData(req, res) {
@@ -153,7 +153,7 @@ function sendAction(socketVersion) {
             let valid = false;
             let action = null;
             for (action of config.config) {
-                if (action.action == req.body.action && action.sku == product.sku && _isEqual(action.settings, req.body.settings)) {
+                if (action.action === req.body.action && action.sku === product.sku && _isEqual(action.settings, req.body.settings)) {
                     valid = true;
                     break;
                 }
@@ -175,7 +175,7 @@ function sendAction(socketVersion) {
             } catch (error) {
                 console.error('Could not save an action to disk: ' + req.body.action + ' - ' + JSON.stringify(req.body.settings))
             }
-            
+
             User.findOne({ channel_id: req.jwt.channel_id }).then(result => {
                 if (!_isNil(result) && result.socket_id !== null) {
                     let settings = {}
@@ -195,7 +195,7 @@ function sendAction(socketVersion) {
                         action: action.action,
                         settings: { message: action.message, ...settings }
                     })
-                    var incObj = {}
+                    const incObj = {};
                     incObj['metrics.' + action.action] = 1
                     Stat.updateOne({ channel_id: req.jwt.channel_id, game: req.params.game }, { $inc:incObj }, { upsert: true }).then((_result, _err) => {
                         res.type('json').json({status: 'sent'})

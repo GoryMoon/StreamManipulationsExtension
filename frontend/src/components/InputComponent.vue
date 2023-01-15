@@ -52,22 +52,22 @@
 </template>
 
 <script>
-import ItemInput from './ItemInput.vue';
-import ActionInput from './ActionInput.vue';
+import ItemInput from './ItemInput.vue'
+import ActionInput from './ActionInput.vue'
 
 export default {
-  name: 'input-component',
-  props: [
-    'value',
-    'data',
-    'index',
-    'id',
-  ],
-  components: {
-    ItemInput,
-    ActionInput,
-  },
-};
+    name: 'input-component',
+    props: [
+        'value',
+        'data',
+        'index',
+        'id'
+    ],
+    components: {
+        ItemInput,
+        ActionInput
+    }
+}
 </script>
 
 <style>

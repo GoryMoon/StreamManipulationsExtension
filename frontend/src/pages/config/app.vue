@@ -26,44 +26,44 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import { SET_MAINTENANCE, SET_LOADED } from '@/stores/mutation-types';
+import { mapState } from 'vuex'
+import { SET_MAINTENANCE, SET_LOADED } from '@/stores/mutation-types'
 
-import ConfigToken from '@/components/ConfigToken.vue';
-import ConfigActions from '@/components/ConfigActions.vue';
+import ConfigToken from '@/components/ConfigToken.vue'
+import ConfigActions from '@/components/ConfigActions.vue'
 
 export default {
-  computed: {
-    isLoaded() {
-      return this.$twitchExtension.channel.initialized
-      && this.$twitchExtension.configuration.initialized
-      && this.$twitchExtension.context.initialized
-      && this.$twitchExtension.viewer.initialized;
+    computed: {
+        isLoaded () {
+            return this.$twitchExtension.channel.initialized &&
+      this.$twitchExtension.configuration.initialized &&
+      this.$twitchExtension.context.initialized &&
+      this.$twitchExtension.viewer.initialized
+        },
+        ...mapState([
+            'loaded',
+            'maintenance'
+        ])
     },
-    ...mapState([
-      'loaded',
-      'maintenance',
-    ]),
-  },
-  components: {
-    ConfigToken,
-    ConfigActions,
-  },
-  beforeUpdate() {
-    if (this.isLoaded && !this.loaded) {
-      this.$store.commit(SET_LOADED, true);
+    components: {
+        ConfigToken,
+        ConfigActions
+    },
+    beforeUpdate () {
+        if (this.isLoaded && !this.loaded) {
+            this.$store.commit(SET_LOADED, true)
 
-      const data = this.$twitchExtension.configuration.global.content;
-      const maintenance = data !== undefined ? JSON.parse(data).maintenance : false;
-      this.$store.commit(SET_MAINTENANCE, maintenance);
-      this.$bugsnag.user = {
-        id: this.$twitchExtension.viewer.opaqueId,
-        channel: this.$twitchExtension.channel.id,
-        game: this.$twitchExtension.context.game,
-      };
+            const data = this.$twitchExtension.configuration.global.content
+            const maintenance = data !== undefined ? JSON.parse(data).maintenance : false
+            this.$store.commit(SET_MAINTENANCE, maintenance)
+            this.$bugsnag.user = {
+                id: this.$twitchExtension.viewer.opaqueId,
+                channel: this.$twitchExtension.channel.id,
+                game: this.$twitchExtension.context.game
+            }
+        }
     }
-  },
-};
+}
 </script>
 
 <style>

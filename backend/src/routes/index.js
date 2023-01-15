@@ -2,7 +2,8 @@ import express from 'express';
 import v1 from './v1'
 import v2 from './v2'
 import dashboard from './dashboard'
-var router = express.Router();
+
+const router = express.Router();
 
 /* V1 of the api */
 router.use('/v1', v1);

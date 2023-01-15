@@ -35,44 +35,44 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
-import { SET_SELECTED_ACTION } from '@/stores/mutation-types';
+import { mapState, mapGetters } from 'vuex'
+import { SET_SELECTED_ACTION } from '@/stores/mutation-types'
 
-import BitsDisplay from '@/components/BitsDisplay.vue';
+import BitsDisplay from '@/components/BitsDisplay.vue'
 
 export default {
-  name: 'action-list',
-  components: {
-    BitsDisplay,
-  },
-  methods: {
-    checkConnection() {
-      return this.axios.head('/ping', {
-        headers: {
-          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
+    name: 'action-list',
+    components: {
+        BitsDisplay
+    },
+    methods: {
+        checkConnection () {
+            return this.axios.head('/ping', {
+                headers: {
+                    authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`
+                }
+            })
         },
-      });
+        sendAction (index) {
+            const action = this.actions[index]
+            this.$store.commit(SET_SELECTED_ACTION, action)
+            this.$router.push({ name: 'send-bits' })
+        }
     },
-    sendAction(index) {
-      const action = this.actions[index];
-      this.$store.commit(SET_SELECTED_ACTION, action);
-      this.$router.push({ name: 'send-bits' });
-    },
-  },
-  computed: {
-    isMobile() {
-      return this.$twitchExtension.queryParams.platform === 'mobile';
-    },
-    ...mapGetters([
-      'getPrice',
-    ]),
-    ...mapState([
-      'bitProducts',
-      'activeGame',
-      'actions',
-    ]),
-  },
-};
+    computed: {
+        isMobile () {
+            return this.$twitchExtension.queryParams.platform === 'mobile'
+        },
+        ...mapGetters([
+            'getPrice'
+        ]),
+        ...mapState([
+            'bitProducts',
+            'activeGame',
+            'actions'
+        ])
+    }
+}
 </script>
 <style lang="scss" scoped>
 hr {

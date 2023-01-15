@@ -233,204 +233,204 @@
 </template>
 
 <script>
-import _cloneDeep from 'lodash/cloneDeep';
-import _debounce from 'lodash/debounce';
-import _pick from 'lodash/pick';
-import _map from 'lodash/map';
-import _find from 'lodash/find';
-import _findIndex from 'lodash/findIndex';
-import draggable from 'vuedraggable';
-import { required } from 'vuelidate/lib/validators';
-import { mapState, mapGetters } from 'vuex';
-import Simplebar from 'simplebar';
+import _cloneDeep from 'lodash/cloneDeep'
+import _debounce from 'lodash/debounce'
+import _pick from 'lodash/pick'
+import _map from 'lodash/map'
+import _find from 'lodash/find'
+import _findIndex from 'lodash/findIndex'
+import draggable from 'vuedraggable'
+import { required } from 'vuelidate/lib/validators'
+import { mapState, mapGetters } from 'vuex'
+import Simplebar from 'simplebar'
 
-import { GET_GAMES, GET_ACTION_DATA, GET_GAME_ACTIONS } from '@/stores/action-types';
+import { GET_GAMES, GET_ACTION_DATA, GET_GAME_ACTIONS } from '@/stores/action-types'
 import {
-  SET_ACTIONS, SET_DEFAULT_ACTIONS, SET_BIT_PRODUCTS,
-  ADD_ACTION, SET_ACTION, REMOVE_ACTION,
-} from '@/stores/mutation-types';
-import InputComponent from './InputComponent.vue';
-import BitsDisplay from './BitsDisplay.vue';
+    SET_ACTIONS, SET_DEFAULT_ACTIONS, SET_BIT_PRODUCTS,
+    ADD_ACTION, SET_ACTION, REMOVE_ACTION
+} from '@/stores/mutation-types'
+import InputComponent from './InputComponent.vue'
+import BitsDisplay from './BitsDisplay.vue'
 
 export default {
-  name: 'config-actions',
-  components: {
-    draggable,
-    InputComponent,
-    BitsDisplay,
-  },
-  data() {
-    return {
-      selectedGame: null,
-      selectedInputData: null,
-      selectedData: {},
-      selectedAction: {},
-      selectedActionIndex: -1,
-      modalShow: false,
-      show_saved: false,
-      show_update: false,
-    };
-  },
-  validations: {
-    selectedAction: {
-      title: {
-        required,
-      },
-      description: {
-        required,
-      },
-      sku: {
-        required,
-      },
+    name: 'config-actions',
+    components: {
+        draggable,
+        InputComponent,
+        BitsDisplay
     },
-  },
-  methods: {
-    selectGame(game) {
-      if (game !== null) {
-        this.$store.dispatch(GET_ACTION_DATA, game.id);
-        this.$store.dispatch(GET_GAME_ACTIONS, game.id);
-      } else {
-        this.$store.commit(SET_ACTIONS, null);
-        this.$store.commit(SET_DEFAULT_ACTIONS, null);
-      }
+    data () {
+        return {
+            selectedGame: null,
+            selectedInputData: null,
+            selectedData: {},
+            selectedAction: {},
+            selectedActionIndex: -1,
+            modalShow: false,
+            show_saved: false,
+            show_update: false
+        }
     },
-    addAction(action) {
-      this.selectedData = action;
-      this.selectedAction = {
-        action: this.selectedData.action,
-        title: this.selectedData.title,
-        description: this.selectedData.description,
-        sku: null,
-      };
-      if (this.selectedData.settings) {
-        this.selectedAction.settings = {};
-        this.selectedData.settings.forEach((data) => {
-          this.selectedAction.settings[data.key] = _cloneDeep(data.default);
-        });
-      }
-      this.modalShow = true;
-      this.selectedInputData = null;
+    validations: {
+        selectedAction: {
+            title: {
+                required
+            },
+            description: {
+                required
+            },
+            sku: {
+                required
+            }
+        }
     },
-    editAction(key) {
-      const index = _findIndex(this.actions, ['key', key]);
-      this.selectedAction = _cloneDeep(this.actions[index]);
-      this.selectedData = _find(this.actionData, ['action', this.selectedAction.action]);
-      this.selectedActionIndex = index;
-      this.modalShow = true;
-    },
-    removeAction(key) {
-      const index = _findIndex(this.actions, ['key', key]);
-      this.$store.commit(REMOVE_ACTION, index);
-    },
-    showModal() {
-      this.$v.selectedAction.$touch();
-    },
-    shownModal(modal) {
-      // eslint-disable-next-line no-new
-      new Simplebar(modal.vueTarget.$refs.modal);
-    },
-    resetModal() {
-      this.selectedActionIndex = -1;
-    },
-    undoChanges() {
-      this.$store.commit(SET_ACTIONS, _cloneDeep(this.defaultActions));
-    },
-    saveAction(bvModalEvt) {
-      bvModalEvt.preventDefault();
-
-      this.$v.selectedAction.$touch();
-      if (this.$v.selectedAction.$anyError) {
-        return;
-      }
-
-      if (this.selectedActionIndex === -1) {
-        this.selectedAction.key = this.actions.length;
-        this.$store.commit(ADD_ACTION, this.selectedAction);
-      } else {
-        this.$store.commit({
-          type: SET_ACTION,
-          index: this.selectedActionIndex,
-          action: this.selectedAction,
-        });
-      }
-
-      this.$nextTick(() => {
-        this.$refs.add_action_modal.hide();
-      });
-    },
-    saveActions: _debounce(function request() {
-      const newActions = _map(this.actions,
-        (val) => _pick(val, ['action', 'description', 'message', 'settings', 'sku', 'title']));
-      this.axios.post(`/actions/${this.selectedGame.id}`, { config: newActions }, {
-        headers: {
-          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
+    methods: {
+        selectGame (game) {
+            if (game !== null) {
+                this.$store.dispatch(GET_ACTION_DATA, game.id)
+                this.$store.dispatch(GET_GAME_ACTIONS, game.id)
+            } else {
+                this.$store.commit(SET_ACTIONS, null)
+                this.$store.commit(SET_DEFAULT_ACTIONS, null)
+            }
         },
-      });
-      this.show_saved = true;
-      this.show_update = false;
-      this.$store.commit(SET_DEFAULT_ACTIONS, _cloneDeep(this.actions));
-      setTimeout(() => { this.show_saved = false; }, 1500);
-    }, 400, { leading: true, trailing: false }),
-    tap(value, fn) {
-      fn(value);
-      return value;
+        addAction (action) {
+            this.selectedData = action
+            this.selectedAction = {
+                action: this.selectedData.action,
+                title: this.selectedData.title,
+                description: this.selectedData.description,
+                sku: null
+            }
+            if (this.selectedData.settings) {
+                this.selectedAction.settings = {}
+                this.selectedData.settings.forEach((data) => {
+                    this.selectedAction.settings[data.key] = _cloneDeep(data.default)
+                })
+            }
+            this.modalShow = true
+            this.selectedInputData = null
+        },
+        editAction (key) {
+            const index = _findIndex(this.actions, ['key', key])
+            this.selectedAction = _cloneDeep(this.actions[index])
+            this.selectedData = _find(this.actionData, ['action', this.selectedAction.action])
+            this.selectedActionIndex = index
+            this.modalShow = true
+        },
+        removeAction (key) {
+            const index = _findIndex(this.actions, ['key', key])
+            this.$store.commit(REMOVE_ACTION, index)
+        },
+        showModal () {
+            this.$v.selectedAction.$touch()
+        },
+        shownModal (modal) {
+            // eslint-disable-next-line no-new
+            new Simplebar(modal.vueTarget.$refs.modal)
+        },
+        resetModal () {
+            this.selectedActionIndex = -1
+        },
+        undoChanges () {
+            this.$store.commit(SET_ACTIONS, _cloneDeep(this.defaultActions))
+        },
+        saveAction (bvModalEvt) {
+            bvModalEvt.preventDefault()
+
+            this.$v.selectedAction.$touch()
+            if (this.$v.selectedAction.$anyError) {
+                return
+            }
+
+            if (this.selectedActionIndex === -1) {
+                this.selectedAction.key = this.actions.length
+                this.$store.commit(ADD_ACTION, this.selectedAction)
+            } else {
+                this.$store.commit({
+                    type: SET_ACTION,
+                    index: this.selectedActionIndex,
+                    action: this.selectedAction
+                })
+            }
+
+            this.$nextTick(() => {
+                this.$refs.add_action_modal.hide()
+            })
+        },
+        saveActions: _debounce(function request () {
+            const newActions = _map(this.actions,
+                (val) => _pick(val, ['action', 'description', 'message', 'settings', 'sku', 'title']))
+            this.axios.post(`/actions/${this.selectedGame.id}`, { config: newActions }, {
+                headers: {
+                    authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`
+                }
+            })
+            this.show_saved = true
+            this.show_update = false
+            this.$store.commit(SET_DEFAULT_ACTIONS, _cloneDeep(this.actions))
+            setTimeout(() => { this.show_saved = false }, 1500)
+        }, 400, { leading: true, trailing: false }),
+        tap (value, fn) {
+            fn(value)
+            return value
+        },
+        getOptions (value) {
+            const ret = []
+            value.options.forEach((option) => {
+                ret.push({ value: option.type, text: option.title })
+            })
+            return ret
+        }
     },
-    getOptions(value) {
-      const ret = [];
-      value.options.forEach((option) => {
-        ret.push({ value: option.type, text: option.title });
-      });
-      return ret;
+    computed: {
+        getBitOptions () {
+            return this.bitProducts !== null && this.selectedGame !== null
+                ? this.tap(this.bitProducts
+                    .filter((prod) => (this.selectedGame.dev && prod.inDevelopment !== undefined) ||
+          (!this.selectedGame.dev && prod.inDevelopment === undefined))
+                    .map((o) => ({ value: o.sku, text: (this.selectedGame.dev ? '(Dev) ' : '') + o.cost.amount })),
+                (m) => m.unshift({ value: null, text: 'Select the amount of bits for this action', disabled: true }))
+                : {}
+        },
+        actions: {
+            get () {
+                return this.$store.state.actions
+            },
+            set (value) {
+                this.$store.commit(SET_ACTIONS, value)
+            }
+        },
+        getFilteredGames () {
+            return this.games.filter((game) => game.dev === false || game.dev === this.dev)
+        },
+        ...mapGetters([
+            'areActionsChanged',
+            'getPrice'
+        ]),
+        ...mapState([
+            'defaultActions',
+            'actionData',
+            'bitProducts',
+            'games',
+            'dev'
+        ])
     },
-  },
-  computed: {
-    getBitOptions() {
-      return this.bitProducts !== null && this.selectedGame !== null
-        ? this.tap(this.bitProducts
-          .filter((prod) => (this.selectedGame.dev && prod.inDevelopment !== undefined)
-          || (!this.selectedGame.dev && prod.inDevelopment === undefined))
-          .map((o) => ({ value: o.sku, text: (this.selectedGame.dev ? '(Dev) ' : '') + o.cost.amount })),
-        (m) => m.unshift({ value: null, text: 'Select the amount of bits for this action', disabled: true }))
-        : {};
-    },
-    actions: {
-      get() {
-        return this.$store.state.actions;
-      },
-      set(value) {
-        this.$store.commit(SET_ACTIONS, value);
-      },
-    },
-    getFilteredGames() {
-      return this.games.filter((game) => game.dev === false || game.dev === this.dev);
-    },
-    ...mapGetters([
-      'areActionsChanged',
-      'getPrice',
-    ]),
-    ...mapState([
-      'defaultActions',
-      'actionData',
-      'bitProducts',
-      'games',
-      'dev',
-    ]),
-  },
-  beforeMount() {
-    this.$store.dispatch(GET_GAMES);
-    const dev = this.$twitchExtension.configuration.developer;
-    if (dev !== undefined && dev.version !== undefined) {
-      if (dev.version === '1.0') {
-        this.show_update = true;
-      }
+    beforeMount () {
+        this.$store.dispatch(GET_GAMES)
+        const dev = this.$twitchExtension.configuration.developer
+        if (dev !== undefined && dev.version !== undefined) {
+            if (dev.version === '1.0') {
+                this.show_update = true
+            }
+        }
+        this.$twitchExtension.bits.getProducts().then((data) => {
+            const products = data
+            products.sort((a, b) => a.cost.amount - b.cost.amount)
+            this.$store.commit(SET_BIT_PRODUCTS, products)
+        })
     }
-    this.$twitchExtension.bits.getProducts().then((data) => {
-      const products = data;
-      products.sort((a, b) => a.cost.amount - b.cost.amount);
-      this.$store.commit(SET_BIT_PRODUCTS, products);
-    });
-  },
-};
+}
 </script>
 
 <style lang="scss" scoped>

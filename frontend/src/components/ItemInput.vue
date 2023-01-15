@@ -45,42 +45,42 @@
 </template>
 
 <script>
-import _findIndex from 'lodash/findIndex';
-import _pick from 'lodash/pick';
-import _map from 'lodash/map';
+import _findIndex from 'lodash/findIndex'
+import _pick from 'lodash/pick'
+import _map from 'lodash/map'
 
 export default {
-  name: 'item-input',
-  props: [
-    'value',
-    'data',
-  ],
-  data() {
-    return {
-      items: [],
-    };
-  },
-  methods: {
-    addItem() {
-      this.items.push({ key: this.items.length, id: '', amount: '' });
-      this.$emit('input', this.getData);
+    name: 'item-input',
+    props: [
+        'value',
+        'data'
+    ],
+    data () {
+        return {
+            items: []
+        }
     },
-    removeItem(key) {
-      this.items.splice(_findIndex(this.items, ['key', key]), 1);
-      this.$emit('input', this.getData);
+    methods: {
+        addItem () {
+            this.items.push({ key: this.items.length, id: '', amount: '' })
+            this.$emit('input', this.getData)
+        },
+        removeItem (key) {
+            this.items.splice(_findIndex(this.items, ['key', key]), 1)
+            this.$emit('input', this.getData)
+        }
     },
-  },
-  computed: {
-    getData() {
-      return JSON.stringify(_map(this.items, (item) => _pick(item, ['id', 'amount'])));
+    computed: {
+        getData () {
+            return JSON.stringify(_map(this.items, (item) => _pick(item, ['id', 'amount'])))
+        }
     },
-  },
-  mounted() {
-    const data = this.value.length > 0 ? JSON.parse(this.value) : [];
-    let i = -1;
-    this.items = _map(data, (item) => ({ key: (i += 1), ...item }));
-  },
-};
+    mounted () {
+        const data = this.value.length > 0 ? JSON.parse(this.value) : []
+        let i = -1
+        this.items = _map(data, (item) => ({ key: (i += 1), ...item }))
+    }
+}
 </script>
 
 <style>

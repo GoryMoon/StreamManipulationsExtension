@@ -8,7 +8,7 @@ import cloneDeep from 'lodash.clonedeep';
 
 import User from '../models/user.model'
 
-var router = express.Router();
+const router = express.Router();
 
 const SECRET = Buffer.from(process.env.SECRET, 'base64').toString()
 
@@ -19,7 +19,7 @@ passport.use(new TwitchStrategy({
     callbackURL: process.env.URL + '/dashboard/auth/callback'
 }, (accessToken, refreshToken, profile, done) => {
     User.findOne({ channel_id: profile.id }).then(result => {
-        if (result != undefined) {
+        if (result !== undefined) {
             profile.token = result.token
             return done(null, profile)
         } else {
@@ -60,7 +60,7 @@ router.get('/', (req, res) => {
 })
 
 function generateJWT(id, token) {
-    return jwt.sign({channel_id: id, token: token}, SECRET, {noTimestamp: true})
+    return jwt.sign({channel_id: id, token: token}, SECRET, {noTimestamp: true}, null)
 }
 
 export default router;

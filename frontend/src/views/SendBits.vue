@@ -45,66 +45,66 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
-import { SET_TRANSACTION_STATUS, SET_ANONYMOUS_SENDER } from '@/stores/mutation-types';
+import { mapState, mapGetters } from 'vuex'
+import { SET_TRANSACTION_STATUS, SET_ANONYMOUS_SENDER } from '@/stores/mutation-types'
 
-import BitsDisplay from '@/components/BitsDisplay.vue';
+import BitsDisplay from '@/components/BitsDisplay.vue'
 
 export default {
-  name: 'send-bits',
-  components: {
-    BitsDisplay,
-  },
-  methods: {
-    checkConnection() {
-      return this.axios.head('/ping', {
-        headers: {
-          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
+    name: 'send-bits',
+    components: {
+        BitsDisplay
+    },
+    methods: {
+        checkConnection () {
+            return this.axios.head('/ping', {
+                headers: {
+                    authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`
+                }
+            })
         },
-      });
+        sendAction () {
+            this.$store.commit(SET_TRANSACTION_STATUS, true)
+            this.checkConnection().then(() => {
+                this.$twitchExtension.bits.useBits(this.selectedAction.sku)
+            }).catch((err) => {
+                this.$bvModal.msgBoxOk('An error ocurred when trying to use bits', {
+                    title: 'Error',
+                    size: 'sm',
+                    buttonSize: 'sm',
+                    okVariant: 'error',
+                    headerClass: 'p-2 border-bottom-0',
+                    footerClass: 'p-2 border-top-0',
+                    centered: true
+                }).catch((error) => {
+                    this.$bugsnag.notify(error)
+                    console.error(`An error ocurred: ${JSON.stringify(error.response)}`)
+                })
+                this.$bugsnag.notify(err)
+                console.error(`An error ocurred: ${JSON.stringify(err.response)}`)
+            })
+        }
     },
-    sendAction() {
-      this.$store.commit(SET_TRANSACTION_STATUS, true);
-      this.checkConnection().then(() => {
-        this.$twitchExtension.bits.useBits(this.selectedAction.sku);
-      }).catch((err) => {
-        this.$bvModal.msgBoxOk('An error ocurred when trying to use bits', {
-          title: 'Error',
-          size: 'sm',
-          buttonSize: 'sm',
-          okVariant: 'error',
-          headerClass: 'p-2 border-bottom-0',
-          footerClass: 'p-2 border-top-0',
-          centered: true,
-        }).catch((error) => {
-          this.$bugsnag.notify(error);
-          console.error(`An error ocurred: ${JSON.stringify(error.response)}`);
-        });
-        this.$bugsnag.notify(err);
-        console.error(`An error ocurred: ${JSON.stringify(err.response)}`);
-      });
-    },
-  },
-  computed: {
-    isMobile() {
-      return this.$twitchExtension.queryParams.platform === 'mobile';
-    },
-    sendAnonymously: {
-      get() {
-        return this.$store.state.sendAnonymously;
-      },
-      set(value) {
-        this.$store.commit(SET_ANONYMOUS_SENDER, value);
-      },
-    },
-    ...mapGetters([
-      'getPrice',
-    ]),
-    ...mapState([
-      'selectedAction',
-    ]),
-  },
-};
+    computed: {
+        isMobile () {
+            return this.$twitchExtension.queryParams.platform === 'mobile'
+        },
+        sendAnonymously: {
+            get () {
+                return this.$store.state.sendAnonymously
+            },
+            set (value) {
+                this.$store.commit(SET_ANONYMOUS_SENDER, value)
+            }
+        },
+        ...mapGetters([
+            'getPrice'
+        ]),
+        ...mapState([
+            'selectedAction'
+        ])
+    }
+}
 </script>
 <style>
 

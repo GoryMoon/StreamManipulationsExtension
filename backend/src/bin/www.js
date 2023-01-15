@@ -11,22 +11,22 @@ import http from 'http'
 import socket from '../socket'
 const debug = debugLib('sebackend:server');
 
-var port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-var server = http.createServer(app);
+const server = http.createServer(app);
 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-const io = socket(server);
+socket(server);
 
 
 /**
  * Normalize a port into a number, string, or false.
  */
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  const port = parseInt(val, 10);
 
   if (isNaN(port)) {
     return val;
@@ -47,9 +47,9 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  const bind = typeof port === 'string'
+      ? 'Pipe ' + port
+      : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -67,9 +67,9 @@ function onError(error) {
 }
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  const address = server.address();
+  const bind = typeof address === 'string'
+      ? 'pipe ' + address
+      : 'port ' + address.port;
   debug('Listening on ' + bind);
 }

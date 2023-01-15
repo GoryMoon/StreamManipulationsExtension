@@ -1,5 +1,5 @@
 import express from 'express';
-import TwitchEbsTools from 'twitch-ebs-tools';
+import { TwitchEbsTools } from 'twitch-ebs-tools';
 import _assign from 'lodash.assign';
 import _pick from 'lodash.pick';
 import _get from 'lodash.get'
@@ -17,7 +17,7 @@ function ping(_req, res) {
 }
 
 async function getGames(_req, res) {
-    var games = await Game.find({})
+    const games = await Game.find({});
     return res.type('json').json(games.map(game => ({ id: game.game, name: game.name, dev: game.dev })))
 }
 
@@ -37,7 +37,7 @@ function postGameActions(req, res) {
                         const fetch = (new TextEncoder().encode(JSON.stringify(req.body.config))).length > 4500;
                         try {
                             const data = await getConfig(channel_id, 'developer')
-                            const conf = _get(data, `developer:${channel_id}.record.content`, JSON.stringify({ game: '', fetch }))
+                            const conf = _get(data, 'content', JSON.stringify({ game: '', fetch }))
                             const merge = _assign({ game: '', fetch }, _pick(JSON.parse(conf), ['game']))
                             sendConfig(channel_id, merge, 'developer', '1.1')
                             if (merge.game !== '') {
@@ -53,7 +53,7 @@ function postGameActions(req, res) {
                         } catch(e) {
                             console.error(e)
                         }
-                        
+
                         res.type('json').json({status: 'saved'})
                     })
             } else {
@@ -66,7 +66,7 @@ function postGameActions(req, res) {
         })
 }
 
-var router = express.Router();
+const router = express.Router();
 
 router.use(auth)
 router.head('/ping', ping)

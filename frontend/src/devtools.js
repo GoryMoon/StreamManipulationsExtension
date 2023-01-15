@@ -1,8 +1,8 @@
-import Vue from 'vue';
-import devtools from '@vue/devtools';
+import Vue from 'vue'
+import devtools from '@vue/devtools'
 
-Vue.config.devtools = process.env.NODE_ENV === 'development';
+Vue.config.devtools = process.env.NODE_ENV === 'development'
 
 if (process.env.NODE_ENV === 'development') {
-  devtools.connect('http://localhost', 8098);
+    devtools.connect('http://localhost', 8098)
 }

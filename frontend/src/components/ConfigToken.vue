@@ -21,7 +21,7 @@
           </b-form-input>
           <b-input-group-append id="copy-wrapper" class="d-inline-block" tabindex="0">
             <b-button
-              :pressed.sync="showingToken"
+              v-model:pressed="showingToken"
               variant="outline-secondary"
               :disabled="!loadedToken"
               :style="{ 'pointer-events': !loadedToken ? 'none': 'inherit'}">
@@ -52,72 +52,72 @@
 </template>
 
 <script>
-import debounce from 'lodash/debounce';
-import repeat from 'lodash/repeat';
+import debounce from 'lodash/debounce'
+import repeat from 'lodash/repeat'
 
-import { SET_DEV } from '@/stores/mutation-types';
+import { SET_DEV } from '@/stores/mutation-types'
 
 export default {
-  name: 'config-token',
-  data() {
-    return {
-      showingToken: false,
-      loadedToken: false,
-      token: 'Not loaded yet',
-    };
-  },
-  methods: {
-    requestToken: debounce(function request() {
-      this.updateToken('token/create');
-    }, 400, { leading: true, trailing: false }),
-    updateToken(path = 'token') {
-      this.axios.get(path, {
-        headers: {
-          authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`,
-        },
-      }).then((result) => {
-        if (result.data !== undefined) {
-          this.token = result.data.token;
-          if (path === 'token') {
-            this.$store.commit(SET_DEV, result.data.dev);
-          }
-          this.loadedToken = true;
-        } else {
-          this.$bugsnag.notify(new Error('Can\'t get the mod token'));
-          this.errorMsg('An error occured when fetching the token, try again later.');
+    name: 'config-token',
+    data () {
+        return {
+            showingToken: false,
+            loadedToken: false,
+            token: 'Not loaded yet'
         }
-      }).catch((err) => {
-        this.$bugsnag.notify(err);
-        this.errorMsg('An error occured when fetching the token, try again later.');
-      });
     },
-    errorMsg(msg) {
-      this.$bvModal.msgBoxOk(msg, {
-        title: 'Error',
-        size: 'sm',
-        buttonSize: 'sm',
-        okVariant: 'error',
-        headerClass: 'p-2 border-bottom-0',
-        footerClass: 'p-2 border-top-0',
-        centered: true,
-      }).catch((error) => {
-        this.$bugsnag.notify(error);
-        console.error(`An error ocurred: ${JSON.stringify(error)}`);
-      });
+    methods: {
+        requestToken: debounce(function request () {
+            this.updateToken('token/create')
+        }, 400, { leading: true, trailing: false }),
+        updateToken (path = 'token') {
+            this.axios.get(path, {
+                headers: {
+                    authorization: `Bearer ${this.$twitchExtension.viewer.sessionToken}`
+                }
+            }).then((result) => {
+                if (result.data !== undefined) {
+                    this.token = result.data.token
+                    if (path === 'token') {
+                        this.$store.commit(SET_DEV, result.data.dev)
+                    }
+                    this.loadedToken = true
+                } else {
+                    this.$bugsnag.notify(new Error('Can\'t get the mod token'))
+                    this.errorMsg('An error occured when fetching the token, try again later.')
+                }
+            }).catch((err) => {
+                this.$bugsnag.notify(err)
+                this.errorMsg('An error occured when fetching the token, try again later.')
+            })
+        },
+        errorMsg (msg) {
+            this.$bvModal.msgBoxOk(msg, {
+                title: 'Error',
+                size: 'sm',
+                buttonSize: 'sm',
+                okVariant: 'error',
+                headerClass: 'p-2 border-bottom-0',
+                footerClass: 'p-2 border-top-0',
+                centered: true
+            }).catch((error) => {
+                this.$bugsnag.notify(error)
+                console.error(`An error ocurred: ${JSON.stringify(error)}`)
+            })
+        }
     },
-  },
-  computed: {
-    getToken() {
-      return !this.showingToken ? '' : this.token;
+    computed: {
+        getToken () {
+            return !this.showingToken ? '' : this.token
+        },
+        getPlaceholder () {
+            return repeat('*', 100)
+        }
     },
-    getPlaceholder() {
-      return repeat('*', 100);
-    },
-  },
-  mounted() {
-    this.updateToken();
-  },
-};
+    mounted () {
+        this.updateToken()
+    }
+}
 </script>
 
 <style scoped>
