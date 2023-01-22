@@ -3,18 +3,19 @@ import {ServerApiVersion} from 'mongodb'
 
 let count = 0;
 
-const connectWithRetry = () => {
+const connectWithRetry = async () => {
     console.log('[MongoDB] Trying to connect')
     mongoose.set('strictQuery', false)
-    mongoose.connect(process.env.MONGO_URI, {
-        autoIndex: true,
-        serverApi: ServerApiVersion.v1,
-    }).then(() => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI as string, {
+            autoIndex: true,
+            serverApi: ServerApiVersion.v1,
+        })
         console.log('[MongoDB] Connected')
-    }).catch(err => {
+    } catch (err) {
         console.log('[MongoDB] Connection unsuccessful, retry after 5 seconds. ', ++count);
         setTimeout(connectWithRetry, 5000)
-    })
+    }
 }
 
 export default connectWithRetry

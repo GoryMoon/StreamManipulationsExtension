@@ -4,12 +4,16 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
 import {engine} from 'express-handlebars';
-import indexRouter from './routes/index';
+import registerRoutes from './routes';
 import helmet from 'helmet';
 import compress from 'compression';
+import {Server} from "socket.io";
 
-export default function (io) {
+export default function (io: Server) {
     const app = express()
+
+    if (app.get('env') === 'production')
+        app.set('trust proxy', 1)
 
     app.use(logger('combined'))
     app.use(cors())
@@ -24,7 +28,7 @@ export default function (io) {
     app.set('view engine', 'handlebars')
     app.disable('etag')
 
-    app.use('/', indexRouter(io));
+    registerRoutes(app, io);
     app.use(express.static(path.join(__dirname, '../public')))
 
     return app

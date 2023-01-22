@@ -3,22 +3,20 @@
   "version": "0.0.3",
   "private": true,
   "scripts": {
-    "cert": "node bin/generate_cert.js server",
-    "start": "node ./bin/www",
-    "server": "babel-node ./src/bin/www",
+    "build": "tsc -p tsconfig.json",
+    "server": "ts-node ./src/bin/www",
     "server:prod": "node ./dist/bin/www",
-    "dev": "cross-env NODE_ENV=development DEBUG=sm-backend:* npm-run-all server",
+    "dev": "cross-env NODE_ENV=development npm-run-all server",
     "clean": "rimraf dist",
-    "build": "babel ./src --out-dir dist",
     "prod": "cross-env NODE_ENV=production npm-run-all clean build server:prod",
     "watch": "nodemon"
   },
   "dependencies": {
-    "@types/jsonwebtoken": "^9.0.1",
-    "@types/tmi.js": "^1.8.2",
-    "axios": "^1.2.2",
+    "@oauth-everything/passport-twitch": "^1.0.3",
+    "axios": "^1.2.3",
     "compression": "^1.7.4",
     "connect-history-api-fallback": "^2.0.0",
+    "connect-redis": "^6.1.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -36,7 +34,9 @@
     "morgan": "^1.10.0",
     "npm-run-all": "^4.1.5",
     "passport": "^0.6.0",
-    "passport-twitch.js": "^0.1.1",
+    "patch-package": "^6.5.1",
+    "postinstall-postinstall": "^2.1.0",
+    "redis": "^4.5.1",
     "smart-request-balancer": "^2.1.1",
     "socket.io": "^4.5.4",
     "tmi.js": "^1.8.5",
@@ -44,12 +44,26 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.20.7",
-    "@babel/core": "^7.20.12",
-    "@babel/node": "^7.20.7",
-    "@babel/preset-env": "^7.20.2",
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/compression": "^1.7.2",
+    "@types/connect-history-api-fallback": "^1.3.5",
+    "@types/connect-redis": "^0.0.19",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/express": "^4.17.15",
+    "@types/express-session": "^1.17.5",
+    "@types/jsonwebtoken": "^9.0.1",
+    "@types/lodash": "^4.14.191",
+    "@types/morgan": "^1.9.4",
+    "@types/passport": "^1.0.11",
+    "@types/tmi.js": "^1.8.2",
+    "@types/uuid": "^9.0.0",
     "cross-env": "^7.0.3",
     "nodemon": "^2.0.20",
-    "rimraf": "^4.0.5"
+    "rimraf": "^4.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  },
+  "resolutions": {
+    "@oauth-everything/passport-twitch@^1.0.3": "patch:@oauth-everything/passport-twitch@npm%3A1.0.3#./.yarn/patches/@oauth-everything-passport-twitch-npm-1.0.3-ef7e909938.patch"
   }
 }

@@ -1,0 +1,11 @@
+{
+  "extends": "@tsconfig/node16",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": true,
+    "noImplicitThis": true
+  },
+  "include": [
+    "src"
+  ]
+}
