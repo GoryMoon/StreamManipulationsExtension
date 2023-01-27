@@ -8,21 +8,14 @@ import Config from '../models/config.model'
 import Game from '../models/game.model'
 import Twitch from '../twitch'
 
-import {
-    authMiddleware,
-    token,
-    createToken,
-    getGameData,
-    getGameActions,
-    sendAction,
-} from './v1'
+import { authMiddleware, token, createToken, getGameData, getGameActions, sendAction } from './v1'
 import { Server } from 'socket.io'
-import { ParamsDictionary } from 'express-serve-static-core'
 import { IPostGameActionsRequest } from '../types'
 import { getTwitchJwt } from '../utils'
+import { gameActionsRequestValidator } from '../validator'
 
 function ping(_req: Request, res: Response) {
-    res.status(200).send()
+    return res.status(200).send()
 }
 
 async function getGames(_req: Request, res: Response) {
@@ -37,73 +30,53 @@ async function getGames(_req: Request, res: Response) {
 }
 
 function postGameActions(twitch: Twitch) {
-    return async (
-        req: Request<ParamsDictionary, object, IPostGameActionsRequest>,
-        res: Response
-    ) => {
+    return async (req: Request, res: Response) => {
         const jwt = getTwitchJwt(res)
-        if (
-            !TwitchEbsTools.verifyTokenNotExpired(jwt) ||
-            !TwitchEbsTools.verifyBroadcaster(jwt)
-        ) {
+        if (!TwitchEbsTools.verifyTokenNotExpired(jwt) || !TwitchEbsTools.verifyBroadcaster(jwt)) {
             return res.status(401).type('json').json({ status: 'not_valid' })
         }
+        const actionData = req.body as IPostGameActionsRequest
+        if (!gameActionsRequestValidator(req.body))
+            return res.status(400).type('json').json({ status: 'invalid_config' })
+
         const channel_id = jwt.channel_id
         try {
-            const game = await Game.findOne({ game: req.params.game })
+            const game = await Game.findOne({ game: { $eq: req.params.game } })
             if (game !== null) {
                 await Config.updateOne(
-                    { channel_id: channel_id, game: req.params.game },
+                    { channel_id: { $eq: channel_id }, game: { $eq: req.params.game } },
                     {
                         channel_id: channel_id,
                         game: req.params.game,
-                        config: req.body.config,
+                        config: actionData.config,
                     },
                     { upsert: true }
                 )
 
-                const fetch =
-                    new TextEncoder().encode(JSON.stringify(req.body.config))
-                        .length > 4500
+                // If the user should fetch from api or twitch config if that is to large
+                const fetch = new TextEncoder().encode(JSON.stringify(actionData.config)).length > 4500
                 try {
                     const data = await twitch.getConfig(channel_id, 'developer')
-                    const conf = _get(
-                        data,
-                        'content',
-                        JSON.stringify({ game: '', fetch })
-                    )
-                    const merge = _assign(
-                        { game: '', fetch },
-                        _pick(JSON.parse(conf), ['game'])
-                    )
+                    const conf = _get(data, 'content', JSON.stringify({ game: '', fetch }))
+                    const merge = _assign({ game: '', fetch }, _pick(JSON.parse(conf), ['game']))
 
-                    await twitch.sendConfig(
-                        channel_id,
-                        merge,
-                        'developer',
-                        '1.1'
-                    )
+                    await twitch.sendConfig(channel_id, merge, 'developer', '1.1')
                     if (merge.game !== '') {
                         await Promise.all([
                             twitch.sendPubSub(channel_id, {
                                 type: 'load',
                                 ...merge,
-                                actions: !fetch ? req.body.config : [],
+                                actions: !fetch ? actionData.config : [],
                             }),
                             twitch.sendConfig(
                                 channel_id,
-                                !fetch ? req.body.config : [],
+                                !fetch ? actionData.config : [],
                                 'broadcaster',
                                 '1.1'
                             ),
                         ])
                     } else {
-                        await twitch.sendConfig(
-                            channel_id,
-                            [],
-                            'broadcaster',
-                            '1.1'
-                        )
+                        await twitch.sendConfig(channel_id, [], 'broadcaster', '1.1')
                     }
                 } catch (e) {
                     console.error(e)
@@ -111,17 +84,11 @@ function postGameActions(twitch: Twitch) {
 
                 return res.type('json').json({ status: 'saved' })
             } else {
-                return res
-                    .type('json')
-                    .status(400)
-                    .json({ status: 'game_not_valid' })
+                return res.type('json').status(400).json({ status: 'game_not_valid' })
             }
         } catch (error) {
             console.error(error)
-            return res
-                .type('json')
-                .status(400)
-                .json({ status: 'game_not_valid' })
+            return res.type('json').status(400).json({ status: 'game_not_valid' })
         }
     }
 }

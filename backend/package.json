@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@oauth-everything/passport-twitch": "^1.0.3",
+    "ajv": "^8.12.0",
     "axios": "^1.2.3",
     "compression": "^1.7.4",
     "connect-history-api-fallback": "^2.0.0",

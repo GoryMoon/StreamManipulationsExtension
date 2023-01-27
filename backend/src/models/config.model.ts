@@ -6,7 +6,7 @@ interface IConfigData {
     action: string
     message: string
     sku: string
-    settings: Types.Map<unknown>
+    settings: Types.Map<string>
 }
 
 interface IConfig {

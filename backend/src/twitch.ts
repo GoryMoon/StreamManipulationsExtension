@@ -7,10 +7,7 @@ export default class Twitch {
     _queue
 
     constructor() {
-        this._twitchSecret = Buffer.from(
-            process.env.TWITCH_SECRET as string,
-            'base64'
-        )
+        this._twitchSecret = Buffer.from(process.env.TWITCH_SECRET as string, 'base64')
         this._queue = new Queue({
             rules: {
                 pubsub: {
@@ -69,10 +66,7 @@ export default class Twitch {
                             }
                         )
                     } catch (error) {
-                        if (
-                            axios.isAxiosError(error) &&
-                            error.response?.status === 429
-                        ) {
+                        if (axios.isAxiosError(error) && error.response?.status === 429) {
                             return retry()
                         }
                         throw error
@@ -86,12 +80,7 @@ export default class Twitch {
         }
     }
 
-    async sendConfig(
-        channel_id: string,
-        content: object,
-        segment: string,
-        version: string
-    ) {
+    async sendConfig(channel_id: string, content: object, segment: string, version: string) {
         const token = sign(
             {
                 user_id: '25148021',
@@ -118,22 +107,17 @@ export default class Twitch {
             await this._queue.request(
                 async retry => {
                     try {
-                        await axios.put(
-                            `https://api.twitch.tv/helix/extensions/configurations`,
-                            body,
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                    'Client-Id': process.env.TWITCH_CLIENT_ID,
-                                },
-                            }
-                        )
+                        await axios.put(`https://api.twitch.tv/helix/extensions/configurations`, body, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                'Client-Id': process.env.TWITCH_CLIENT_ID,
+                            },
+                        })
                     } catch (error) {
                         if (
                             axios.isAxiosError(error) &&
                             error.response &&
-                            (error.response.status === 429 ||
-                                error.response.status === 409)
+                            (error.response.status === 429 || error.response.status === 409)
                         ) {
                             return retry()
                         }
@@ -171,21 +155,15 @@ export default class Twitch {
             await this._queue.request(
                 async retry => {
                     try {
-                        await axios.get(
-                            `https://api.twitch.tv/helix/extensions/configurations`,
-                            {
-                                params,
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                    'Client-Id': process.env.TWITCH_CLIENT_ID,
-                                },
-                            }
-                        )
+                        await axios.get(`https://api.twitch.tv/helix/extensions/configurations`, {
+                            params,
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                'Client-Id': process.env.TWITCH_CLIENT_ID,
+                            },
+                        })
                     } catch (error) {
-                        if (
-                            axios.isAxiosError(error) &&
-                            error.response?.status === 429
-                        ) {
+                        if (axios.isAxiosError(error) && error.response?.status === 429) {
                             return retry()
                         }
                         throw error

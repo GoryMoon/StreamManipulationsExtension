@@ -1,11 +1,7 @@
 import express from 'express'
 import session from 'express-session'
 import passport from 'passport'
-import {
-    Profile,
-    Strategy as TwitchStrategy,
-    VerifyCallback,
-} from '@oauth-everything/passport-twitch'
+import { Profile, Strategy as TwitchStrategy, VerifyCallback } from '@oauth-everything/passport-twitch'
 import history from 'connect-history-api-fallback'
 import jwt from 'jsonwebtoken'
 import { createClient } from 'redis'
@@ -44,8 +40,7 @@ export default function () {
                     return done(null, authUser)
                 } else {
                     return done(null, undefined, {
-                        message:
-                            'You need to setup the extension before you can use this',
+                        message: 'You need to setup the extension before you can use this',
                     })
                 }
             } catch (e) {

@@ -17,20 +17,12 @@ function isAddress(obj: unknown): obj is AddressInfo {
 }
 
 function getTokenJwt(socket: Socket): TokenJwtPayload {
-    if ('jwt' in socket.data.jwt && isTokenJwtPayload(socket.data.jwt))
-        return socket.data.jwt
+    if ('jwt' in socket.data.jwt && isTokenJwtPayload(socket.data.jwt)) return socket.data.jwt
     throw new Error('invalid token')
 }
 function getTwitchJwt(res: Response): TwitchPayload {
-    if ('jwt' in res.locals && isTwitchPayload(res.locals.jwt))
-        return res.locals.jwt
+    if ('jwt' in res.locals && isTwitchPayload(res.locals.jwt)) return res.locals.jwt
     throw new Error('invalid token')
 }
 
-export {
-    isTwitchPayload,
-    isTokenJwtPayload,
-    isAddress,
-    getTokenJwt,
-    getTwitchJwt,
-}
+export { isTwitchPayload, isTokenJwtPayload, isAddress, getTokenJwt, getTwitchJwt }

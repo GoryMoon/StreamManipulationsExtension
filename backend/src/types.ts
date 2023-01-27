@@ -1,4 +1,3 @@
-import { TwitchPayload } from 'twitch-ebs-tools'
 import { IConfigData } from './models/config.model'
 import { JwtPayload } from 'jsonwebtoken'
 
@@ -8,7 +7,7 @@ export interface IChannelPointAction {
     id: string
 }
 
-export interface IActionRequest {
+export interface ISendActionRequest {
     token: string
     product: ITransactionProduct
     user: string
@@ -37,7 +36,16 @@ export interface ITransactionData {
     product: ITransactionProduct
 }
 
-export interface ITransactionReceipt extends TwitchPayload {
+export interface ITransactionReceipt {
+    readonly exp: number
+    readonly opaque_user_id: string
+    readonly channel_id: string
+    readonly role: string
+    readonly is_unliked: boolean
+    readonly pubsub_perms: {
+        readonly listen?: ReadonlyArray<string>
+        readonly send?: ReadonlyArray<string>
+    }
     topic: string
     data: ITransactionData
 }

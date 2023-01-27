@@ -10,21 +10,14 @@ export default async () => {
     const channel_names: string[] = []
 
     users.forEach(user => {
-        if (
-            'channel_name' in user &&
-            'connect_bot' in user &&
-            user.connect_bot === true
-        ) {
+        if ('channel_name' in user && 'connect_bot' in user && user.connect_bot === true) {
             channels.set(user.channel_name, user.channel_id)
             channel_names.push(user.channel_name)
         }
     })
     await connectToChannels(channels, channel_names)
 
-    async function connectToChannels(
-        channels: Map<string, string>,
-        channel_names: string[]
-    ) {
+    async function connectToChannels(channels: Map<string, string>, channel_names: string[]) {
         console.log(`[Chat] Connecting to '${channel_names.toString()}'`)
         const client = new Client({
             connection: {
@@ -36,11 +29,7 @@ export default async () => {
 
         await client.connect()
 
-        const chatStatusListener = async (
-            channel_id: string,
-            channel: string,
-            status: boolean
-        ) => {
+        const chatStatusListener = async (channel_id: string, channel: string, status: boolean) => {
             try {
                 const result = await User.updateOne(
                     { channel_id: channel_id },
@@ -77,9 +66,7 @@ export default async () => {
                 console.log(`Checking if id is in list: ${channel}`)
                 const id = channels.get(channel.substring(1))
                 if (id !== undefined) {
-                    console.log(
-                        `Emitting channel point reward for channel: ${channel}`
-                    )
+                    console.log(`Emitting channel point reward for channel: ${channel}`)
                     events.emit(['cp', id], {
                         user: tags['display-name'],
                         message: message,

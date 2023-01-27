@@ -35,9 +35,7 @@ async function start() {
     })
     httpServer.on('listening', function () {
         const address = httpServer.address()
-        const bind = isAddress(address)
-            ? `port ${address.port}`
-            : `pipe ${String(address)}`
+        const bind = isAddress(address) ? `port ${address.port}` : `pipe ${String(address)}`
         console.log('[www] Listening on ' + bind)
     })
 }

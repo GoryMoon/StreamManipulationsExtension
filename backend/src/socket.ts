@@ -20,10 +20,7 @@ export default function (): Server {
     const secret = Buffer.from(rawSecret, 'base64')
 
     const io = new Server()
-    const middleware = async (
-        socket: Socket,
-        next: (err?: ExtendedError) => void
-    ) => {
+    const middleware = async (socket: Socket, next: (err?: ExtendedError) => void) => {
         const ip = socket.handshake.headers['x-forwarded-for']
         console.log(`Connection from ${String(ip)}`)
         const token = socket.handshake.query['token'] as string
@@ -35,16 +32,12 @@ export default function (): Server {
             try {
                 data = jwt.verify(token, secret, { complete: false })
             } catch (err) {
-                console.log(
-                    `Authentication error: Failed to verify token ${token}`
-                )
+                console.log(`Authentication error: Failed to verify token ${token}`)
                 return next(new Error('authentication error'))
             }
-            if (typeof data === 'string')
-                return next(new Error('authentication error'))
+            if (typeof data === 'string') return next(new Error('authentication error'))
 
-            if (!isTokenJwtPayload(data))
-                return next(new Error('authentication error'))
+            if (!isTokenJwtPayload(data)) return next(new Error('authentication error'))
 
             const channelId = data.channel_id
             const user = await User.findOne({
@@ -56,9 +49,7 @@ export default function (): Server {
                 console.log('Connection successful')
                 next()
             } else {
-                console.log(
-                    `Authentication error: Couldn't find user with id ${channelId}`
-                )
+                console.log(`Authentication error: Couldn't find user with id ${channelId}`)
                 next(new Error('authentication error'))
             }
         }
@@ -74,26 +65,13 @@ export default function (): Server {
         if (_isNil(user)) throw new Error('Channel not found')
 
         socket.emit('update_game_connection', user.socket_id !== null)
-        socket.emit(
-            'update_chat_status',
-            'connect_bot' in user && user.connect_bot === true
-        )
+        socket.emit('update_chat_status', 'connect_bot' in user && user.connect_bot === true)
 
         const config = await Config.findOne({ channel_id: jwt.channel_id })
         if (!_isNil(config)) socket.emit('config', config.config)
 
         const actionListener = (action: IAction) => {
-            socket.emit(
-                'action',
-                _pick(action, [
-                    '_id',
-                    'action',
-                    'bits',
-                    'sender',
-                    'game',
-                    'createdAt',
-                ])
-            )
+            socket.emit('action', _pick(action, ['_id', 'action', 'bits', 'sender', 'game', 'createdAt']))
         }
         const connectionListener = (value: boolean) => {
             socket.emit('update_game_connection', value)
@@ -130,20 +108,13 @@ export default function (): Server {
         socket.on('disconnect', () => {
             events.off(['action', jwt.channel_id], actionListener)
             events.off(['connection', jwt.channel_id], connectionListener)
-            events.off(
-                ['channel_status', jwt.channel_id],
-                channelStatusListener
-            )
+            events.off(['channel_status', jwt.channel_id], channelStatusListener)
             events.off(['cp', jwt.channel_id], cpListener)
             console.log('Dashboard: ' + socket.id + ' disconnected')
         })
     })
 
-    async function sendActions(
-        socket: Socket,
-        channelId: string,
-        offset: number
-    ) {
+    async function sendActions(socket: Socket, channelId: string, offset: number) {
         const action = await Action.find(
             { channel_id: channelId },
             ['_id', 'action', 'bits', 'sender', 'game', 'createdAt'],
@@ -159,8 +130,7 @@ export default function (): Server {
             if (!_isNil(action.config)) {
                 for (const [key, value] of Object.entries(action.config)) {
                     try {
-                        if (typeof value === 'string')
-                            settings.set(key, JSON.parse(value))
+                        if (typeof value === 'string') settings.set(key, JSON.parse(value))
                         else settings.set(key, value)
                     } catch (error) {
                         settings.set(key, value)
@@ -204,12 +174,7 @@ export default function (): Server {
                 twitch.sendPubSub(jwt.channel_id, {
                     mod_active: true,
                 }),
-                twitch.sendConfig(
-                    jwt.channel_id,
-                    { mod_active: true },
-                    'developer',
-                    '1.0'
-                ),
+                twitch.sendConfig(jwt.channel_id, { mod_active: true }, 'developer', '1.0'),
             ])
         }
 
@@ -220,22 +185,14 @@ export default function (): Server {
         events.on(['cp', jwt.channel_id], cpListener)
 
         socket.on('disconnect', async () => {
-            await User.updateOne(
-                { channel_id: jwt.channel_id, token: jwt.token },
-                { socket_id: null }
-            )
+            await User.updateOne({ channel_id: jwt.channel_id, token: jwt.token }, { socket_id: null })
 
             events.emit(['connection', jwt.channel_id], false)
             events.off(['run', jwt.channel_id], replayListener)
             events.off(['cp', jwt.channel_id], cpListener)
             await Promise.all([
                 twitch.sendPubSub(jwt.channel_id, { mod_active: false }),
-                twitch.sendConfig(
-                    jwt.channel_id,
-                    { mod_active: false },
-                    'developer',
-                    '1.0'
-                ),
+                twitch.sendConfig(jwt.channel_id, { mod_active: false }, 'developer', '1.0'),
             ])
         })
     })
@@ -251,8 +208,7 @@ export default function (): Server {
                 await unload(data.channel_id)
                 return
             }
-            if (_isNil(await Game.findOne({ game })))
-                throw new Error('game not valid')
+            if (_isNil(await Game.findOne({ game }))) throw new Error('game not valid')
 
             const user = await User.updateOne(
                 {
@@ -271,8 +227,7 @@ export default function (): Server {
             })
             const fetch = _isNil(cfg)
                 ? false
-                : new TextEncoder().encode(JSON.stringify(cfg.config)).length >
-                  4500
+                : new TextEncoder().encode(JSON.stringify(cfg.config)).length > 4500
 
             const updates: Promise<void>[] = [
                 twitch.sendPubSub(data.channel_id, {
@@ -281,22 +236,10 @@ export default function (): Server {
                     fetch,
                     actions: !fetch ? (_isNil(cfg) ? [] : cfg.config) : [],
                 }),
-                twitch.sendConfig(
-                    data.channel_id,
-                    { game, fetch },
-                    'developer',
-                    '1.1'
-                ),
+                twitch.sendConfig(data.channel_id, { game, fetch }, 'developer', '1.1'),
             ]
             if (!fetch && !_isNil(cfg) && !_isNil(cfg.config))
-                updates.push(
-                    twitch.sendConfig(
-                        data.channel_id,
-                        cfg.config,
-                        'broadcaster',
-                        '1.1'
-                    )
-                )
+                updates.push(twitch.sendConfig(data.channel_id, cfg.config, 'broadcaster', '1.1'))
 
             await Promise.all(updates)
             events.emit(['connection', data.channel_id], true)
@@ -337,10 +280,7 @@ export default function (): Server {
         socket.on('game', changeGame)
 
         socket.on('disconnect', async () => {
-            await User.updateOne(
-                { channel_id: data.channel_id, token: data.token },
-                { socket_id: null }
-            )
+            await User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: null })
             await unload(data.channel_id)
         })
     })
