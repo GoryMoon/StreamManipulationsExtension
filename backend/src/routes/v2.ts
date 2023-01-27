@@ -46,9 +46,11 @@ function postGameActions(twitch: Twitch) {
                 await Config.updateOne(
                     { channel_id: { $eq: channel_id }, game: { $eq: req.params.game } },
                     {
-                        channel_id: channel_id,
-                        game: req.params.game,
-                        config: actionData.config,
+                        $set: {
+                            channel_id: channel_id,
+                            game: req.params.game,
+                            config: actionData.config,
+                        },
                     },
                     { upsert: true }
                 )

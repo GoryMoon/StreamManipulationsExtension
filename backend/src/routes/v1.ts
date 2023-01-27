@@ -84,7 +84,7 @@ async function newToken(channel_id: string) {
     const token = uuid()
     await User.updateOne(
         { channel_id: { $eq: channel_id } },
-        { token: token },
+        { $set: { token: token } },
         {
             upsert: true,
             setDefaultsOnInsert: true,
@@ -153,7 +153,7 @@ async function postGameActions(req: Request, res: Response) {
 
     await Config.updateOne(
         { channel_id: { $eq: jwt.channel_id }, game: { $eq: req.params.game } },
-        { config: data.config },
+        { $set: { config: data.config } },
         { upsert: true }
     )
     return res.type('json').json({ status: 'saved' })
