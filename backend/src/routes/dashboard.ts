@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import session from 'express-session'
 import passport from 'passport'
 import { Profile, Strategy as TwitchStrategy, VerifyCallback } from '@oauth-everything/passport-twitch'
@@ -9,6 +9,7 @@ import ConnectRedis from 'connect-redis'
 import _cloneDeep from 'lodash/cloneDeep'
 
 import User from '../models/user.model'
+import _isNil from 'lodash/isNil'
 
 interface AuthUser extends Profile {
     token?: string
@@ -33,8 +34,8 @@ export default function () {
             done: VerifyCallback<AuthUser>
         ) => {
             try {
-                const user = await User.findOne({ channel_id: profile.id })
-                if (user !== null) {
+                const user = await User.findOne({ channel_id: { $eq: profile.id } })
+                if (!_isNil(user)) {
                     const authUser: AuthUser = profile
                     authUser.token = user.token
                     return done(null, authUser)
@@ -86,7 +87,7 @@ export default function () {
             failWithError: true,
         })
     )
-    router.get('/logout', (req, res, next) => {
+    router.get('/logout', (req: Request, res: Response, next: NextFunction) => {
         req.logout(err => {
             if (err) return next(err)
             res.redirect('/dashboard')
@@ -98,11 +99,11 @@ export default function () {
         })
     )
 
-    router.get('/', (req, res) => {
+    router.get('/', (req: Request, res: Response) => {
         let user = undefined
         if (req.session && req.user) {
             const data: AuthUser = _cloneDeep(req.user as AuthUser)
-            if (data.token !== undefined) {
+            if (!_isNil(data.token)) {
                 data.token = generateJWT(data.id, data.token)
                 user = JSON.stringify(data)
             }

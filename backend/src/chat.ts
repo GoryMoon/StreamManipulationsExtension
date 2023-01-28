@@ -2,6 +2,7 @@ import User from './models/user.model'
 import { Client } from 'tmi.js'
 
 import events from './events'
+import _isNil from 'lodash/isNil'
 
 export default async () => {
     console.log('[Chat] Starting chatbot')
@@ -32,14 +33,16 @@ export default async () => {
         const chatStatusListener = async (channel_id: string, channel: string, status: boolean) => {
             try {
                 const result = await User.updateOne(
-                    { channel_id: channel_id },
+                    { channel_id: { $eq: channel_id } },
                     {
-                        channel_name: channel,
-                        connect_bot: status,
+                        $set: {
+                            channel_name: channel,
+                            connect_bot: status,
+                        },
                     }
                 )
 
-                if (result !== undefined) {
+                if (!_isNil(result)) {
                     if (status) {
                         await client.join(channel).then(data => {
                             channels.set(channel, channel_id)
@@ -65,7 +68,7 @@ export default async () => {
             if ('custom-reward-id' in tags) {
                 console.log(`Checking if id is in list: ${channel}`)
                 const id = channels.get(channel.substring(1))
-                if (id !== undefined) {
+                if (!_isNil(id)) {
                     console.log(`Emitting channel point reward for channel: ${channel}`)
                     events.emit(['cp', id], {
                         user: tags['display-name'],

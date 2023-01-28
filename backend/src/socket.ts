@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import _pick from 'lodash/pick'
 import _isNil from 'lodash/isNil'
+import _isString from 'lodash/isString'
 
 import User from './models/user.model'
 import Game from './models/game.model'
@@ -12,7 +13,7 @@ import events from './events'
 import Twitch from './twitch'
 import { ExtendedError } from 'socket.io/dist/namespace'
 import { IChannelPointAction } from './types'
-import { getTokenJwt, isTokenJwtPayload } from './utils'
+import { prepareActionSettings, getTokenJwt, isTokenJwtPayload } from './utils'
 
 export default function (): Server {
     const twitch = new Twitch()
@@ -35,14 +36,14 @@ export default function (): Server {
                 console.log(`Authentication error: Failed to verify token ${token}`)
                 return next(new Error('authentication error'))
             }
-            if (typeof data === 'string') return next(new Error('authentication error'))
+            if (_isString(data)) return next(new Error('authentication error'))
 
             if (!isTokenJwtPayload(data)) return next(new Error('authentication error'))
 
             const channelId = data.channel_id
             const user = await User.findOne({
-                channel_id: channelId,
-                token: data.token,
+                channel_id: { $eq: channelId },
+                token: { $eq: data.token },
             })
             if (!_isNil(user)) {
                 socket.data.jwt = data
@@ -61,13 +62,13 @@ export default function (): Server {
         const jwt = getTokenJwt(socket)
         await sendActions(socket, jwt.channel_id, 0)
 
-        const user = await User.findOne({ channel_id: jwt.channel_id })
+        const user = await User.findOne({ channel_id: { $eq: jwt.channel_id } })
         if (_isNil(user)) throw new Error('Channel not found')
 
-        socket.emit('update_game_connection', user.socket_id !== null)
+        socket.emit('update_game_connection', !_isNil(user.socket_id))
         socket.emit('update_chat_status', 'connect_bot' in user && user.connect_bot === true)
 
-        const config = await Config.findOne({ channel_id: jwt.channel_id })
+        const config = await Config.findOne({ channel_id: { $eq: jwt.channel_id } })
         if (!_isNil(config)) socket.emit('config', config.config)
 
         const actionListener = (action: IAction) => {
@@ -116,7 +117,7 @@ export default function (): Server {
 
     async function sendActions(socket: Socket, channelId: string, offset: number) {
         const action = await Action.find(
-            { channel_id: channelId },
+            { channel_id: { $eq: channelId } },
             ['_id', 'action', 'bits', 'sender', 'game', 'createdAt'],
             { limit: 50, sort: { createdAt: -1 }, skip: offset }
         )
@@ -126,17 +127,7 @@ export default function (): Server {
 
     function createReplayListener(socket: Socket) {
         return (action: IAction) => {
-            const settings = new Map<string, unknown>()
-            if (!_isNil(action.config)) {
-                for (const [key, value] of Object.entries(action.config)) {
-                    try {
-                        if (typeof value === 'string') settings.set(key, JSON.parse(value))
-                        else settings.set(key, value)
-                    } catch (error) {
-                        settings.set(key, value)
-                    }
-                }
-            }
+            const settings = prepareActionSettings(action.config)
             socket.emit('action', {
                 bits: action.bits,
                 user: action.sender,
@@ -161,10 +152,10 @@ export default function (): Server {
         const jwt = getTokenJwt(socket)
         const user = await User.updateOne(
             {
-                channel_id: jwt.channel_id,
-                token: jwt.token,
+                channel_id: { $eq: jwt.channel_id },
+                token: { $eq: jwt.token },
             },
-            { socket_id: socket.id },
+            { $set: { socket_id: socket.id } },
             { upsert: true }
         )
 
@@ -185,7 +176,10 @@ export default function (): Server {
         events.on(['cp', jwt.channel_id], cpListener)
 
         socket.on('disconnect', async () => {
-            await User.updateOne({ channel_id: jwt.channel_id, token: jwt.token }, { socket_id: null })
+            await User.updateOne(
+                { channel_id: { $eq: jwt.channel_id }, token: { $eq: jwt.token } },
+                { socket_id: null }
+            )
 
             events.emit(['connection', jwt.channel_id], false)
             events.off(['run', jwt.channel_id], replayListener)
@@ -208,22 +202,22 @@ export default function (): Server {
                 await unload(data.channel_id)
                 return
             }
-            if (_isNil(await Game.findOne({ game }))) throw new Error('game not valid')
+            if (_isNil(await Game.findOne({ game: { $eq: game } }))) throw new Error('game not valid')
 
             const user = await User.updateOne(
                 {
-                    channel_id: data.channel_id,
-                    token: data.token,
+                    channel_id: { $eq: data.channel_id },
+                    token: { $eq: data.token },
                 },
-                { socket_id: socket.id },
+                { $set: { socket_id: socket.id } },
                 { upsert: true }
             )
 
             if (!user.acknowledged) return
 
             const cfg = await Config.findOne({
-                channel_id: data.channel_id,
-                game,
+                channel_id: { $eq: data.channel_id },
+                game: { $eq: game },
             })
             const fetch = _isNil(cfg)
                 ? false
@@ -246,7 +240,7 @@ export default function (): Server {
         }
 
         const game = socket.handshake.query.game
-        if (!_isNil(game) && game !== '' && typeof game === 'string') {
+        if (_isString(game) && game !== '') {
             await changeGame(game)
         }
 
@@ -280,7 +274,10 @@ export default function (): Server {
         socket.on('game', changeGame)
 
         socket.on('disconnect', async () => {
-            await User.updateOne({ channel_id: data.channel_id, token: data.token }, { socket_id: null })
+            await User.updateOne(
+                { channel_id: { $eq: data.channel_id }, token: { $eq: data.token } },
+                { socket_id: null }
+            )
             await unload(data.channel_id)
         })
     })

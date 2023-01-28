@@ -12,72 +12,78 @@ import Game from '../models/game.model'
 import Stat from '../models/stat.model'
 import Action from '../models/action.model'
 import events from '../events'
-import {
-    ISendActionRequest,
-    IPostGameActionsRequest,
-    ITransactionProduct,
-    ITransactionReceipt,
-} from '../types'
-import { getTwitchJwt } from '../utils'
+import { ITransactionProduct } from '../types'
+import { prepareActionSettings, getTwitchJwt, sendErrorStatus } from '../utils'
 import {
     gameActionsRequestValidator,
     sendActionRequestValidator,
     transactionReceiptValidator,
 } from '../validator'
+import { HttpStatusCode } from 'axios'
 
+/**
+ * Only allows valid JWT tokens in the authorization header
+ */
 function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    if (req.headers['authorization']) {
+    if (req.headers['authorization'])
         try {
             const authorization = req.headers['authorization'].split(' ')
             if (authorization[0] !== 'Bearer') {
-                return res.status(401).send('invalid_token')
+                return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'invalid_token')
             } else {
                 const jwt = new TwitchEbsTools(process.env.TWITCH_SECRET as string).validateToken(
                     authorization[1]
                 )
-                if (jwt instanceof Error || !TwitchEbsTools.verifyTokenNotExpired(jwt)) {
-                    return res.status(401).send('expired')
-                }
+                if (jwt instanceof Error || !TwitchEbsTools.verifyTokenNotExpired(jwt))
+                    return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'expired')
+
+                if (
+                    !TwitchEbsTools.verifyViewerOrBroadcaster(jwt) ||
+                    !TwitchEbsTools.verifyRole(jwt, 'moderator')
+                )
+                    return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'bad_role')
+
                 res.locals.jwt = jwt
                 return next()
             }
         } catch (err) {
             console.log(err)
-            return res.status(403).send()
+            return sendErrorStatus(res, HttpStatusCode.BadRequest, 'error_parsing_token')
         }
-    } else {
-        return res.status(401).send('no_token')
+    else {
+        return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'no_token')
     }
+}
+
+/**
+ * Only allows broadcaster JWT tokens
+ */
+function broadcasterMiddleware(req: Request, res: Response, next: NextFunction) {
+    const jwt = getTwitchJwt(res)
+    if (TwitchEbsTools.verifyBroadcaster(jwt)) return next()
+    return sendErrorStatus(res, HttpStatusCode.Forbidden, 'bad_role')
 }
 
 async function token(req: Request, res: Response) {
     const jwt = getTwitchJwt(res)
-    if (TwitchEbsTools.verifyRole(jwt, 'broadcaster')) {
-        const user = await User.findOne({
-            channel_id: { $eq: jwt.channel_id },
+    const user = await User.findOne({
+        channel_id: { $eq: jwt.channel_id },
+    })
+    if (!_isNil(user)) {
+        return res.json({
+            token: generateJWT(jwt.channel_id, user.token),
+            dev: user.dev,
         })
-        if (!_isNil(user)) {
-            return res.type('json').json({
-                token: generateJWT(jwt.channel_id, user.token),
-                dev: user.dev,
-            })
-        } else {
-            const token = await newToken(jwt.channel_id)
-            return res.type('json').json({ token: token, dev: false })
-        }
     } else {
-        return res.status(403).type('json').send()
+        const token = await newToken(jwt.channel_id)
+        return res.json({ token: token, dev: false })
     }
 }
 
 async function createToken(req: Request, res: Response) {
     const jwt = getTwitchJwt(res)
-    if (TwitchEbsTools.verifyRole(jwt, 'broadcaster')) {
-        const token = await newToken(jwt.channel_id)
-        return res.type('json').json({ token: token })
-    } else {
-        return res.status(403).type('json').send()
-    }
+    const token = await newToken(jwt.channel_id)
+    return res.json({ token: token })
 }
 
 async function newToken(channel_id: string) {
@@ -98,29 +104,33 @@ function generateJWT(id: string, token: string) {
     return jwt.sign({ channel_id: id, token: token }, SECRET, { noTimestamp: true })
 }
 
+/**
+ * Param required: :name
+ *
+ * Route that returns the supported action data for a game
+ */
 async function getGameData(req: Request, res: Response) {
-    const jwt = getTwitchJwt(res)
-    if (!TwitchEbsTools.verifyTokenNotExpired(jwt) || !TwitchEbsTools.verifyBroadcaster(jwt))
-        return res.status(401).type('json').json({ status: 'not_valid' })
-
     try {
         const game = await Game.findOne({ game: { $eq: req.params.name } })
         if (_isNil(game)) {
-            return res.status(404).type('json').json({ status: 'game_not_found' })
+            return sendErrorStatus(res, HttpStatusCode.NotFound, 'game_not_found')
         } else if (_isNil(game.data) || game.data.length <= 0) {
-            return res.type('json').json({ data: [] })
+            return res.json({ data: [] })
         }
 
-        res.type('json').json({ data: game.data })
+        res.json({ data: game.data })
     } catch (error) {
-        return res.status(404).type('json').json({ status: 'game_not_found' })
+        return sendErrorStatus(res, HttpStatusCode.NotFound, 'game_not_found')
     }
 }
 
+/**
+ * Param required: :game
+ *
+ * Route that returns actions for a specific game from the current channel
+ */
 async function getGameActions(req: Request, res: Response) {
     const jwt = getTwitchJwt(res)
-    if (!TwitchEbsTools.verifyTokenNotExpired(jwt) || !TwitchEbsTools.verifyBroadcaster(jwt))
-        return res.status(401).type('json').json({ status: 'not_valid' })
 
     try {
         const conf = await Config.findOne({
@@ -128,50 +138,59 @@ async function getGameActions(req: Request, res: Response) {
             game: { $eq: req.params.game },
         })
         if (_isNil(conf) || _isNil(conf.config) || conf.config.length <= 0) {
-            return res.type('json').json({ data: [] })
+            return res.json({ data: [] })
         }
 
-        res.type('json').json({ data: conf.config })
+        res.json({ data: conf.config })
     } catch (e) {
-        return res
-            .status(500)
-            .type('json')
-            .json({
-                status: typeof e === 'object' && e && 'message' in e ? e.message : String(e),
-            })
+        return sendErrorStatus(
+            res,
+            HttpStatusCode.InternalServerError,
+            e instanceof Error ? e.message : String(e)
+        )
     }
 }
 
+/**
+ * Param required: /:game
+ * Body required
+ *
+ * Updates the action for a specific game on the current broadcaster channel
+ */
 async function postGameActions(req: Request, res: Response) {
     const jwt = getTwitchJwt(res)
-    if (!TwitchEbsTools.verifyTokenNotExpired(jwt) || !TwitchEbsTools.verifyBroadcaster(jwt))
-        return res.status(401).type('json').json({ status: 'not_valid' })
 
-    const data = req.body as IPostGameActionsRequest
     if (!gameActionsRequestValidator(req.body))
-        return res.status(400).type('json').json({ status: 'invalid_config' })
+        return sendErrorStatus(res, HttpStatusCode.BadRequest, 'invalid_config')
 
     await Config.updateOne(
         { channel_id: { $eq: jwt.channel_id }, game: { $eq: req.params.game } },
-        { $set: { config: data.config } },
+        { $set: { config: req.body.config } },
         { upsert: true }
     )
-    return res.type('json').json({ status: 'saved' })
+    return res.json({ status: 'saved' })
 }
 
+/**
+ * Returns a route to handle action messages
+ *
+ * Body required
+ *
+ * @param io The IO Server to send events on
+ * @param socketVersion The version of the api to use
+ */
 function sendAction(io: Server, socketVersion: string) {
     return async (req: Request, res: Response) => {
-        const data = req.body as ISendActionRequest
-
-        if (!sendActionRequestValidator(data))
-            return res.status(400).type('json').json({ status: 'invalid_config' })
+        if (!sendActionRequestValidator(req.body))
+            return sendErrorStatus(res, HttpStatusCode.BadRequest, 'invalid_config')
+        const data = req.body
 
         const token = data.token
         let product: ITransactionProduct
         if (process.env.NODE_ENV === 'development') {
             product = data.product
         } else {
-            const invalidBits = () => res.status(401).type('json').json({ status: 'bits_not_valid' })
+            const invalidBits = () => sendErrorStatus(res, HttpStatusCode.Unauthorized, 'bits_not_valid')
             try {
                 const bitPayload = new TwitchEbsTools(process.env.TWITCH_SECRET as string).validateToken(
                     token
@@ -179,10 +198,8 @@ function sendAction(io: Server, socketVersion: string) {
                 if (bitPayload instanceof Error || !TwitchEbsTools.verifyTokenNotExpired(bitPayload))
                     return invalidBits()
 
-                const recipe = bitPayload as unknown as ITransactionReceipt
-                if (!transactionReceiptValidator(recipe)) return invalidBits()
-
-                product = recipe.data.product
+                if (!transactionReceiptValidator(bitPayload)) return invalidBits()
+                product = bitPayload.data.product
             } catch (err) {
                 return invalidBits()
             }
@@ -195,7 +212,7 @@ function sendAction(io: Server, socketVersion: string) {
                 game: { $eq: req.params.game },
             })
             if (_isNil(cfg) || _isNil(cfg.config) || cfg.config.length <= 0)
-                return res.status(401).type('json').json({ status: 'config_not_valid' })
+                return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'config_not_valid')
 
             // Look for action in channel config for the game
             let action: IConfigData | null = null
@@ -210,7 +227,8 @@ function sendAction(io: Server, socketVersion: string) {
                 }
             }
 
-            if (action === null) return res.status(401).type('json').json({ status: 'action_not_valid' })
+            if (_isNil(action)) return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'action_not_valid')
+
             try {
                 // Save action in database
                 const result = await Action.create({
@@ -233,17 +251,7 @@ function sendAction(io: Server, socketVersion: string) {
                 const user = await User.findOne({ channel_id: { $eq: jwt.channel_id } })
                 if (!_isNil(user) && !_isNil(user.socket_id)) {
                     // Update the settings from the action, parsing string as json
-                    const settings = new Map<string, unknown>()
-                    if (!_isNil(action.settings)) {
-                        for (const [key, value] of Object.entries(action.settings)) {
-                            try {
-                                if (typeof value === 'string') settings.set(key, JSON.parse(value))
-                                else settings.set(key, value)
-                            } catch (error) {
-                                settings.set(key, value)
-                            }
-                        }
-                    }
+                    const settings = prepareActionSettings(action.settings)
                     console.log(`Sending action: ${action.action} to #${user.channel_name}`)
 
                     // Send the action to the connected game
@@ -263,15 +271,15 @@ function sendAction(io: Server, socketVersion: string) {
                         { upsert: true }
                     )
 
-                    return res.type('json').json({ status: 'sent' })
+                    return res.json({ status: 'sent' })
                 } else {
-                    return res.status(401).type('json').json({ status: 'socket_not_valid' })
+                    return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'socket_not_valid')
                 }
             } catch (_err) {
-                return res.status(401).type('json').json({ status: 'channel_not_valid' })
+                return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'channel_not_valid')
             }
         } catch (error) {
-            return res.status(401).type('json').json({ status: 'not_valid' })
+            return sendErrorStatus(res, HttpStatusCode.Unauthorized, 'not_valid')
         }
     }
 }
@@ -282,15 +290,15 @@ function setup(io: Server) {
     router.use(authMiddleware)
 
     //Token
-    router.get('/token/', token)
-    router.get('/token/create', createToken)
+    router.get('/token/', broadcasterMiddleware, token)
+    router.get('/token/create', broadcasterMiddleware, createToken)
 
     //Game
-    router.get('/game/:name', getGameData)
+    router.get('/game/:name', broadcasterMiddleware, getGameData)
 
     //Actions
     router.get('/actions/:game', getGameActions)
-    router.post('/actions/:game', postGameActions)
+    router.post('/actions/:game', broadcasterMiddleware, postGameActions)
 
     //Action sent
     router.post('/action/:game', sendAction(io, 'v1'))
@@ -300,6 +308,7 @@ function setup(io: Server) {
 export {
     setup as default,
     authMiddleware,
+    broadcasterMiddleware,
     token,
     createToken,
     getGameData,

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { sign } from 'jsonwebtoken'
 import Queue from 'smart-request-balancer'
+import _isNil from 'lodash/isNil'
 
 export default class Twitch {
     _twitchSecret
@@ -124,7 +125,7 @@ export default class Twitch {
                         throw error
                     }
                 },
-                channel_id !== null ? `${channel_id}-${segment}` : segment,
+                !_isNil(channel_id) ? `${channel_id}-${segment}` : segment,
                 'config_set'
             )
         } catch (e) {
@@ -169,7 +170,7 @@ export default class Twitch {
                         throw error
                     }
                 },
-                channel_id !== null ? `${channel_id}-${segment}` : segment,
+                !_isNil(channel_id) ? `${channel_id}-${segment}` : segment,
                 'config_get'
             )
         } catch (e) {

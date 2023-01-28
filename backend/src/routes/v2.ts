@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express'
-import { TwitchEbsTools } from 'twitch-ebs-tools'
 import _assign from 'lodash/assign'
 import _pick from 'lodash/pick'
 import _get from 'lodash/get'
@@ -8,19 +7,34 @@ import Config from '../models/config.model'
 import Game from '../models/game.model'
 import Twitch from '../twitch'
 
-import { authMiddleware, token, createToken, getGameData, getGameActions, sendAction } from './v1'
+import {
+    authMiddleware,
+    token,
+    createToken,
+    getGameData,
+    getGameActions,
+    sendAction,
+    broadcasterMiddleware,
+} from './v1'
 import { Server } from 'socket.io'
-import { IPostGameActionsRequest } from '../types'
-import { getTwitchJwt } from '../utils'
+import { getTwitchJwt, sendErrorStatus } from '../utils'
 import { gameActionsRequestValidator } from '../validator'
+import { HttpStatusCode } from 'axios'
+import _isNil from 'lodash/isNil'
 
+/**
+ * Ping route to check for connectivity and server availability
+ */
 function ping(_req: Request, res: Response) {
     return res.status(200).send()
 }
 
+/**
+ * Route that returns supported games
+ */
 async function getGames(_req: Request, res: Response) {
     const games = await Game.find({})
-    return res.type('json').json(
+    return res.json(
         games.map(game => ({
             id: game.game,
             name: game.name,
@@ -29,20 +43,22 @@ async function getGames(_req: Request, res: Response) {
     )
 }
 
-function postGameActions(twitch: Twitch) {
+/**
+ * Returns route that handles action config data saving
+ */
+function postGameActions() {
+    const twitch = new Twitch()
+
     return async (req: Request, res: Response) => {
         const jwt = getTwitchJwt(res)
-        if (!TwitchEbsTools.verifyTokenNotExpired(jwt) || !TwitchEbsTools.verifyBroadcaster(jwt)) {
-            return res.status(401).type('json').json({ status: 'not_valid' })
-        }
-        const actionData = req.body as IPostGameActionsRequest
         if (!gameActionsRequestValidator(req.body))
-            return res.status(400).type('json').json({ status: 'invalid_config' })
+            return sendErrorStatus(res, HttpStatusCode.BadRequest, 'invalid_config')
 
+        const actionData = req.body
         const channel_id = jwt.channel_id
         try {
             const game = await Game.findOne({ game: { $eq: req.params.game } })
-            if (game !== null) {
+            if (!_isNil(game)) {
                 await Config.updateOne(
                     { channel_id: { $eq: channel_id }, game: { $eq: req.params.game } },
                     {
@@ -84,35 +100,34 @@ function postGameActions(twitch: Twitch) {
                     console.error(e)
                 }
 
-                return res.type('json').json({ status: 'saved' })
+                return res.json({ status: 'saved' })
             } else {
-                return res.type('json').status(400).json({ status: 'game_not_valid' })
+                return sendErrorStatus(res, HttpStatusCode.BadRequest, 'game_not_valid')
             }
         } catch (error) {
             console.error(error)
-            return res.type('json').status(400).json({ status: 'game_not_valid' })
+            return sendErrorStatus(res, HttpStatusCode.BadRequest, 'game_not_valid')
         }
     }
 }
 
 export default function setup(io: Server) {
-    const twitch = new Twitch()
     const router = express.Router()
 
     router.use(authMiddleware)
     router.head('/ping', ping)
 
     //Token
-    router.get('/token/', token)
-    router.get('/token/create', createToken)
+    router.get('/token/', broadcasterMiddleware, token)
+    router.get('/token/create', broadcasterMiddleware, createToken)
 
     //Game
-    router.get('/games', getGames)
-    router.get('/game/:name', getGameData)
+    router.get('/games', broadcasterMiddleware, getGames)
+    router.get('/game/:name', broadcasterMiddleware, getGameData)
 
     //Actions
     router.get('/actions/:game', getGameActions)
-    router.post('/actions/:game', postGameActions(twitch))
+    router.post('/actions/:game', broadcasterMiddleware, postGameActions())
 
     //Action sent
     router.post('/action/:game', sendAction(io, 'v2'))

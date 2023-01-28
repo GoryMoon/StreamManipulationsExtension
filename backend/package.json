@@ -73,5 +73,8 @@
   },
   "resolutions": {
     "@oauth-everything/passport-twitch@^1.0.3": "patch:@oauth-everything/passport-twitch@npm%3A1.0.3#./.yarn/patches/@oauth-everything-passport-twitch-npm-1.0.3-ef7e909938.patch"
+  },
+  "peerDependencies": {
+    "@types/node": "*"
   }
 }

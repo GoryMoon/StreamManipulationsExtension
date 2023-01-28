@@ -1,11 +1,11 @@
 import Ajv, { JSONSchemaType } from 'ajv'
-import { IConfigData } from '../models/config.model'
+import { IConfigData } from './models/config.model'
 import {
     ISendActionRequest,
     IPostGameActionsRequest,
     ITransactionProduct,
     ITransactionReceipt,
-} from '../types'
+} from './types'
 
 const ajv = new Ajv({ formats: { date: true } })
 

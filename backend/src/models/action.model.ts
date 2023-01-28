@@ -7,7 +7,7 @@ interface IAction {
     bits: number
     sender: string
     action: string
-    config: Partial<unknown>
+    config: Types.Map<unknown>
 }
 
 const schema = new Schema<IAction, Model<IAction>>(
