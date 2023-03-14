@@ -5,7 +5,7 @@ import { Profile, Strategy as TwitchStrategy, VerifyCallback } from '@oauth-ever
 import history from 'connect-history-api-fallback'
 import jwt from 'jsonwebtoken'
 import { createClient } from 'redis'
-import ConnectRedis from 'connect-redis'
+import RedisStore from 'connect-redis'
 import _cloneDeep from 'lodash/cloneDeep'
 
 import User from '../models/user.model'
@@ -50,13 +50,16 @@ export default function () {
         }
     )
 
-    const RedisStore = ConnectRedis(session)
-    const redisClient = createClient({ legacyMode: true })
+    const redisClient = createClient()
     redisClient.connect().catch(console.error)
+
+    const redisStore: RedisStore = new RedisStore({
+        client: redisClient,
+    })
 
     router.use(
         session({
-            store: new RedisStore({ client: redisClient }),
+            store: redisStore,
             secret: secret,
             resave: false,
             saveUninitialized: false,
