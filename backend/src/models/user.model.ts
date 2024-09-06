@@ -7,7 +7,8 @@ interface IUser {
     channel_name: string
     dev: boolean
     connect_bot: boolean
-    socket_id?: string
+    socket_id?: string,
+    connected_game?: string,
 }
 
 const schema = new Schema<IUser>({
@@ -18,7 +19,9 @@ const schema = new Schema<IUser>({
     dev: { type: Boolean, default: false },
     connect_bot: { type: Boolean, default: false },
     socket_id: { type: String, default: null },
+    connected_game: { type: String, default: null },
 })
 
 const user = model<IUser>('User', schema)
-export { user as default, IUser }
+export { user as default }
+export type { IUser }

@@ -8,6 +8,11 @@
 		}
 	],
 	"settings": {
-		"git.ignoreLimitWarning": true
+		"git.ignoreLimitWarning": true,
+		"vue.inlayHints.optionsWrapper": true,
+		"vue.inlayHints.vBindShorthand": true,
+		"vue.inlayHints.missingProps": true,
+		"vue.inlayHints.inlineHandlerLeading": true,
+		"vue.inlayHints.destructuredProps": true
 	}
 }

@@ -2,13 +2,14 @@ import axios from 'axios'
 import { sign } from 'jsonwebtoken'
 import Queue from 'smart-request-balancer'
 import _isNil from 'lodash/isNil'
+import logger from './logger'
 
 export default class Twitch {
     _twitchSecret
     _queue
 
     constructor() {
-        this._twitchSecret = Buffer.from(process.env.TWITCH_SECRET as string, 'base64')
+        this._twitchSecret = Buffer.from(process.env.TWITCH_EXTENSTION_SECRET, 'base64')
         this._queue = new Queue({
             rules: {
                 pubsub: {
@@ -44,7 +45,7 @@ export default class Twitch {
             this._twitchSecret,
             {
                 expiresIn: '3m',
-            }
+            },
         )
 
         try {
@@ -64,7 +65,7 @@ export default class Twitch {
                                     Authorization: `Bearer ${token}`,
                                     'Client-Id': process.env.TWITCH_CLIENT_ID,
                                 },
-                            }
+                            },
                         )
                     } catch (error) {
                         if (axios.isAxiosError(error) && error.response?.status === 429) {
@@ -74,10 +75,10 @@ export default class Twitch {
                     }
                 },
                 channel_id,
-                'pubsub'
+                'pubsub',
             )
         } catch (e) {
-            console.log(e)
+            logger.error(e)
         }
     }
 
@@ -90,7 +91,7 @@ export default class Twitch {
             this._twitchSecret,
             {
                 expiresIn: '3m',
-            }
+            },
         )
 
         const body = new Map([
@@ -126,10 +127,10 @@ export default class Twitch {
                     }
                 },
                 !_isNil(channel_id) ? `${channel_id}-${segment}` : segment,
-                'config_set'
+                'config_set',
             )
         } catch (e) {
-            console.log(e)
+            logger.error(e)
         }
     }
 
@@ -142,7 +143,7 @@ export default class Twitch {
             this._twitchSecret,
             {
                 expiresIn: '3m',
-            }
+            },
         )
 
         const params = new Map([
@@ -171,10 +172,10 @@ export default class Twitch {
                     }
                 },
                 !_isNil(channel_id) ? `${channel_id}-${segment}` : segment,
-                'config_get'
+                'config_get',
             )
         } catch (e) {
-            console.log(e)
+            logger.error(e)
         }
     }
 }

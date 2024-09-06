@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express, { type Request } from 'express'
 import _assign from 'lodash/assign'
 import _pick from 'lodash/pick'
 import _get from 'lodash/get'
@@ -6,6 +6,8 @@ import _get from 'lodash/get'
 import Config from '../models/config.model'
 import Game from '../models/game.model'
 import Twitch from '../twitch'
+
+import logger from '../logger'
 
 import {
     authMiddleware,
@@ -16,30 +18,31 @@ import {
     sendAction,
     broadcasterMiddleware,
 } from './v1'
-import { Server } from 'socket.io'
-import { getTwitchJwt, sendErrorStatus } from '../utils'
+import { sendErrorStatus } from '../utils'
 import { gameActionsRequestValidator } from '../validator'
 import { HttpStatusCode } from 'axios'
 import _isNil from 'lodash/isNil'
+import type { IoServer } from '../types'
+import type { JwtResponse } from './types'
 
 /**
  * Ping route to check for connectivity and server availability
  */
-function ping(_req: Request, res: Response) {
+function ping(_req: Request, res: JwtResponse) {
     return res.status(200).send()
 }
 
 /**
  * Route that returns supported games
  */
-async function getGames(_req: Request, res: Response) {
+async function getGames(_req: Request, res: JwtResponse) {
     const games = await Game.find({})
     return res.json(
         games.map(game => ({
             id: game.game,
             name: game.name,
             dev: game.dev,
-        }))
+        })),
     )
 }
 
@@ -49,26 +52,27 @@ async function getGames(_req: Request, res: Response) {
 function postGameActions() {
     const twitch = new Twitch()
 
-    return async (req: Request, res: Response) => {
-        const jwt = getTwitchJwt(res)
+    return async (req: Request, res: JwtResponse) => {
         if (!gameActionsRequestValidator(req.body))
             return sendErrorStatus(res, HttpStatusCode.BadRequest, 'invalid_config')
 
         const actionData = req.body
-        const channel_id = jwt.channel_id
+        const channel_id = res.locals.jwt.channel_id
         try {
-            const game = await Game.findOne({ game: { $eq: req.params.game } })
+            const gameParam = req.params['game']
+
+            const game = await Game.findOne({ game: { $eq: gameParam } })
             if (!_isNil(game)) {
                 await Config.updateOne(
-                    { channel_id: { $eq: channel_id }, game: { $eq: req.params.game } },
+                    { channel_id: { $eq: channel_id }, game: { $eq: gameParam } },
                     {
                         $set: {
                             channel_id: channel_id,
-                            game: req.params.game,
+                            game: gameParam,
                             config: actionData.config,
                         },
                     },
-                    { upsert: true }
+                    { upsert: true },
                 )
 
                 // If the user should fetch from api or twitch config if that is to large
@@ -90,14 +94,14 @@ function postGameActions() {
                                 channel_id,
                                 !fetch ? actionData.config : [],
                                 'broadcaster',
-                                '1.1'
+                                '1.1',
                             ),
                         ])
                     } else {
                         await twitch.sendConfig(channel_id, [], 'broadcaster', '1.1')
                     }
                 } catch (e) {
-                    console.error(e)
+                    logger.error(e)
                 }
 
                 return res.json({ status: 'saved' })
@@ -105,13 +109,13 @@ function postGameActions() {
                 return sendErrorStatus(res, HttpStatusCode.BadRequest, 'game_not_valid')
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             return sendErrorStatus(res, HttpStatusCode.BadRequest, 'game_not_valid')
         }
     }
 }
 
-export default function setup(io: Server) {
+export default function setup(io: IoServer) {
     const router = express.Router()
 
     router.use(authMiddleware)

@@ -1,6 +1,0 @@
-{
-    "exec": "npm run dev",
-    "ignore": ["dashboard/*"],
-    "watch": ["src/*", "public/*"],
-    "ext": "ts, js, html, css, json"
-}

@@ -61,4 +61,5 @@ const schema = new Schema<IGame, Model<IGame>>({
 })
 
 const game = model<IGame>('Game', schema)
-export { game as default, IGame, IGameData, IGameSetting }
+export { game as default }
+export type { IGame, IGameData, IGameSetting }

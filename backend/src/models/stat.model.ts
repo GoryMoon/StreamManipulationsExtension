@@ -15,4 +15,5 @@ const schema = new Schema<IStat>({
 })
 
 const stat = model<IStat>('Stat', schema)
-export { stat as default, IStat }
+export { stat as default }
+export type { IStat }

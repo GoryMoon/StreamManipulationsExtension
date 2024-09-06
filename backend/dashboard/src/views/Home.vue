@@ -1,45 +1,34 @@
 <template>
-  <div class="dashboard">
-    <h1>Dashboard</h1>
-    <hr>
-    <b-card-group v-if="hasUser" deck>
-      <b-card title="Replay Actions" style="max-width: 30rem;">
-        <b-card-text>
-          Here you can monitor and replay actions that users have done from the extension
-        </b-card-text>
-        <b-button to="replay" variant="outline-info">Replay Actions</b-button>
-      </b-card>
-      <b-card title="Actions" style="max-width: 30rem;">
-        <b-card-text>
-          Here you check and test you actions
-        </b-card-text>
-        <b-button to="actions" variant="outline-info">View Actions</b-button>
-      </b-card>
-      <b-card title="Channel Points" style="max-width: 30rem;">
-        <b-card-text>
-          Here you can get the channel points to use in the events file
-        </b-card-text>
-        <b-button to="channel_points" variant="outline-info">View Channel Points</b-button>
-      </b-card>
-    </b-card-group>
-    <div v-else>
-      <p>You need to login to start monitor actions</p>
-      <b-button variant="outline-info" href="/dashboard/auth">
-        Login
-      </b-button>
+    <div class="dashboard">
+        <h1>Dashboard</h1>
+        <hr />
+        <BCardGroup v-if="store.hasUser" deck>
+            <BCard title="Action History" style="max-width: 30rem">
+                <BCardText>
+                    Here you can monitor and replay actions that users have done from the extension
+                </BCardText>
+                <BButton to="history" variant="outline-info">View History</BButton>
+            </BCard>
+            <BCard title="Actions" style="max-width: 30rem">
+                <BCardText> Here you check and test you actions </BCardText>
+                <BButton to="actions" variant="outline-info">View Actions</BButton>
+            </BCard>
+            <BCard title="Channel Points" style="max-width: 30rem">
+                <BCardText> Here you can get the channel points to use in the events file </BCardText>
+                <BButton to="channel_points" variant="outline-info">View Channel Points</BButton>
+            </BCard>
+        </BCardGroup>
+        <div v-else>
+            <p>You need to login to start monitor actions</p>
+            <BButton variant="outline-info" :href="`${serverUrl}/dashboard/auth`"> Login </BButton>
+        </div>
     </div>
-  </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup lang="ts">
+import { useUserStore } from '@/stores/user'
 
-export default {
-  name: 'home',
-  computed: {
-    ...mapGetters([
-      'hasUser'
-    ])
-  }
-}
+const store = useUserStore()
+
+const serverUrl = import.meta.env.DEV ? 'http://localhost:3000' : ''
 </script>

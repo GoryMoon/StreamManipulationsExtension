@@ -33,4 +33,5 @@ const schema = new Schema<IConfig, Model<IConfig>>({
 })
 
 const config = model<IConfig>('Config', schema)
-export { config as default, IConfig, IConfigData }
+export { config as default }
+export type { IConfig, IConfigData }

@@ -1,0 +1,21 @@
+diff --git a/dist/Strategy.js b/dist/Strategy.js
+index 69ef910465971767889764d53716f791522e22e4..e1c9c631f82c17d168c06564a438312fad87c1b7 100644
+--- a/dist/Strategy.js
++++ b/dist/Strategy.js
+@@ -10,10 +10,15 @@ class Strategy extends passport_oauth2_1.Strategy {
+             ...options
+         }, verify);
+         this.name = "twitch";
++        this.clientID = options.clientID;
+     }
+     userProfile(accessToken, done) {
+         this._oauth2.useAuthorizationHeaderforGET(true);
+-        this._oauth2.get("https://api.twitch.tv/helix/users", accessToken, (error, result) => {
++        let headers = {
++            'Authorization': "Bearer " + accessToken,
++            'Client-ID': this.clientID
++        };
++        this._oauth2._request("GET", "https://api.twitch.tv/helix/users", headers, "", "", (error, result) => {
+             if (error)
+                 return done(new passport_oauth2_1.InternalOAuthError("Failed to fetch user profile", error));
+             let json;

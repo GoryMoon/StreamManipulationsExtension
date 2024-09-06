@@ -1,15 +1,21 @@
-import express, { NextFunction, Request, Response } from 'express'
+import express, { static as static_, type NextFunction, type Request, type Response } from 'express'
 import session from 'express-session'
 import passport from 'passport'
-import { Profile, Strategy as TwitchStrategy, VerifyCallback } from '@oauth-everything/passport-twitch'
+import {
+    type Profile,
+    Strategy as TwitchStrategy,
+    type VerifyCallback,
+} from '@oauth-everything/passport-twitch'
 import history from 'connect-history-api-fallback'
 import jwt from 'jsonwebtoken'
-import { createClient } from 'redis'
-import RedisStore from 'connect-redis'
+import MongoStore from 'connect-mongo'
 import _cloneDeep from 'lodash/cloneDeep'
+import _isNil from 'lodash/isNil'
 
 import User from '../models/user.model'
-import _isNil from 'lodash/isNil'
+import mongoose from 'mongoose'
+import type { MongoClient } from 'mongodb'
+import path from 'path'
 
 interface AuthUser extends Profile {
     token?: string
@@ -18,20 +24,19 @@ interface AuthUser extends Profile {
 export default function () {
     const router = express.Router()
 
-    const secret = process.env.SECRET as string
-    const SECRET = Buffer.from(secret, 'base64').toString()
+    const SECRET = Buffer.from(process.env.APP_SECRET, 'base64').toString()
 
     const twitchStrategy = new TwitchStrategy(
         {
-            clientID: process.env.TWITCH_CLIENT_ID as string,
-            clientSecret: process.env.TWITCH_CLIENT_SECRET as string,
-            callbackURL: `${process.env.URL as string}/dashboard/auth/callback`,
+            clientID: process.env.TWITCH_CLIENT_ID,
+            clientSecret: process.env.TWITCH_CLIENT_SECRET,
+            callbackURL: `${process.env.URL}/dashboard/auth/callback`,
         },
         async (
-            accessToken: string,
-            refreshToken: string,
+            _accessToken: string,
+            _refreshToken: string,
             profile: Profile,
-            done: VerifyCallback<AuthUser>
+            done: VerifyCallback<AuthUser>,
         ) => {
             try {
                 const user = await User.findOne({ channel_id: { $eq: profile.id } })
@@ -47,26 +52,28 @@ export default function () {
             } catch (e) {
                 done(e as Error)
             }
-        }
+        },
     )
 
-    const redisClient = createClient()
-    redisClient.connect().catch(console.error)
-
-    const redisStore: RedisStore = new RedisStore({
-        client: redisClient,
+    const clientPromise = Promise.resolve(mongoose.connection.getClient())
+    const mongoStore = MongoStore.create({
+        clientPromise: clientPromise as unknown as Promise<MongoClient>,
+        autoRemove: 'native',
+        collectionName: 'dashboard-sessions',
     })
 
     router.use(
         session({
-            store: redisStore,
-            secret: secret,
+            store: process.env.NODE_ENV == 'development' ? new session.MemoryStore() : mongoStore,
+            secret: SECRET,
             resave: false,
             saveUninitialized: false,
+            name: 'smapiSession',
             cookie: {
                 secure: 'auto',
+                httpOnly: false,
             },
-        })
+        }),
     )
     router.use(passport.initialize())
     router.use(passport.session())
@@ -88,30 +95,32 @@ export default function () {
             successRedirect: '/dashboard',
             failureRedirect: '/dashboard?error=1',
             failWithError: true,
-        })
+        }),
     )
+    router.get('/me', (req: Request, res: Response) => {
+        if (req.session && req.user) {
+            const data: AuthUser = _cloneDeep(req.user as AuthUser)
+            if (!_isNil(data.token)) {
+                data.token = generateJWT(data.id, data.token)
+
+                return res.json(data)
+            }
+        }
+        
+        res.status(401).send()
+    })
+
     router.get('/logout', (req: Request, res: Response, next: NextFunction) => {
         req.logout(err => {
             if (err) return next(err)
             res.redirect('/dashboard')
         })
     })
-    router.use(
-        history({
-            index: '/',
-        })
-    )
+    router.use(history())
 
-    router.get('/', (req: Request, res: Response) => {
-        let user = undefined
-        if (req.session && req.user) {
-            const data: AuthUser = _cloneDeep(req.user as AuthUser)
-            if (!_isNil(data.token)) {
-                data.token = generateJWT(data.id, data.token)
-                user = JSON.stringify(data)
-            }
-        }
-        res.render('dashboard', { layout: false, user: user })
+    router.use(static_(path.join(__dirname, '../../public')))
+    router.get('/', (_req: Request, res: Response) => {
+        res.sendFile(path.join(__dirname, '../../public/index.html'))
     })
 
     function generateJWT(id: string, token: string) {

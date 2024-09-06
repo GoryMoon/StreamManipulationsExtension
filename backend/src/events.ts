@@ -1,4 +1,4 @@
-import { EventEmitter2 } from 'eventemitter2'
+import { EventEmitter } from 'eventemitter3'
 
-const emitter = new EventEmitter2()
+const emitter = new EventEmitter()
 export default emitter

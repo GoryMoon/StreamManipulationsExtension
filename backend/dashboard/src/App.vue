@@ -1,67 +1,92 @@
 <template>
-  <div>
-    <b-navbar type="dark" variant="primary" class="mb-3">
-      <b-container>
-        <b-navbar-brand to="/">Stream Engineer</b-navbar-brand>
-        <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+    <LoadingBar />
+    <BNavbar variant="dark-subtle" container="md" class="mb-3">
+        <BNavbarBrand to="/">Stream Manipulations</BNavbarBrand>
+        <BNavbarToggle target="nav-collapse"></BNavbarToggle>
 
-        <b-collapse id="nav-collapse" is-nav>
-          <b-navbar-nav v-if="hasUser">
-            <b-nav-item to="replay" active-class="active">
-              Replay Actions <b-badge v-if="getUnwatchedAmount > 0" variant="info">{{ getUnwatchedAmount }}</b-badge>
-            </b-nav-item>
-            <b-nav-item to="actions" active-class="active">Actions</b-nav-item>
-            <b-nav-item to="channel_points" active-class="active">Channel Point Rewards</b-nav-item>
-          </b-navbar-nav>
+        <BCollapse id="nav-collapse" is-nav>
+            <BNavbarNav v-if="store.hasUser">
+                <BNavItem to="history" active-class="active">
+                    History
+                    <BBadge v-if="replayStore.getUnwatchedAmount > 0" variant="info">
+                        {{ replayStore.getUnwatchedAmount }}
+                    </BBadge>
+                </BNavItem>
+                <BNavItem to="actions" active-class="active">Actions</BNavItem>
+                <BNavItem to="channel_points" active-class="active">Channel Point Rewards</BNavItem>
+            </BNavbarNav>
 
-          <b-navbar-nav class="ml-auto">
-            <b-nav-text
-            v-if="hasUser"
-            :class="['mr-3', gameConnected ? 'text-success': 'text-danger']"
-            v-b-tooltip.hover :title="gameConnected ? 'Game connected': 'Game not connected'">
-              <fa :icon="gameConnected ? 'link': 'unlink'"></fa>
-            </b-nav-text>
-            <b-nav-item-dropdown right v-if="hasUser">
-              <template v-slot:button-content>
-                <em>{{ user.display_name }}</em>
-              </template>
-              <b-dropdown-item href="/dashboard/logout">Sign Out</b-dropdown-item>
-            </b-nav-item-dropdown>
-            <b-nav-item href="/dashboard/auth" v-else>Login</b-nav-item>
-          </b-navbar-nav>
-        </b-collapse>
-      </b-container>
-    </b-navbar>
-    <b-container id="app">
-      <b-alert variant="danger" :show="hasError">
-        You need to setup the extension before you can use this
-      </b-alert>
-      <router-view></router-view>
-    </b-container>
-</div>
+            <BNavbarNav class="ms-auto mb-2 mb-lg-0">
+                <BNavText
+                    v-if="store.hasUser"
+                    :class="['me-3', conStore.isGameConnected ? 'text-success' : 'text-danger']">
+                    {{ connectedGame }}
+                </BNavText>
+
+                <BNavText
+                    v-if="store.hasUser" v-BTooltip.hover
+                    :class="['me-3', conStore.connected ? 'text-success' : 'text-danger']"
+                    :title="conStore.connected ? 'Connected to server' : 'Server offline'">
+                    <fa :icon="conStore.connected ? 'link' : 'unlink'" />
+                </BNavText>
+
+                <BNavItemDropdown v-if="store.hasUser" right>
+                    <template #button-content>
+                        <em>{{ store.user!.displayName }}</em>
+                    </template>
+                    <BDropdownItem :href="`${serverUrl}/dashboard/logout`">Sign Out</BDropdownItem>
+                </BNavItemDropdown>
+                <BNavItem v-else :href="`${serverUrl}/dashboard/auth`">Login</BNavItem>
+            </BNavbarNav>
+        </BCollapse>
+    </BNavbar>
+
+    <BContainer>
+        <BAlert variant="danger" :model-value="hasError">
+            You need to setup the extension before you can use this
+        </BAlert>
+        <RouterView></RouterView>
+    </BContainer>
+    <BToastOrchestrator />
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex'
+<script setup lang="ts">
+import { RouterView, useRoute } from 'vue-router'
+import { computed } from 'vue'
 
-export default {
-  name: 'app',
-  computed: {
-    ...mapState([
-      'user',
-      'gameConnected'
-    ]),
-    ...mapGetters([
-      'hasUser',
-      'getUnwatchedAmount'
-    ]),
-    hasError () {
-      return this.$route.query.error === '1'
-    }
-  }
-}
+import { useColorMode } from 'bootstrap-vue-next'
+import { useUserStore } from './stores/user'
+
+import { socket } from '@/socket'
+import { useConnectionStore } from './stores/connection'
+import { useChannelPointStore } from './stores/cp'
+import { useHistoryStore } from './stores/replay'
+import { useConfigStore } from './stores/config'
+import LoadingBar from './components/LoadingBar.vue'
+
+const serverUrl = import.meta.env.DEV ? 'http://localhost:3000' : ''
+
+const route = useRoute()
+
+const store = useUserStore()
+const conStore = useConnectionStore()
+const cpStore = useChannelPointStore()
+const replayStore = useHistoryStore()
+const configStore = useConfigStore()
+
+const hasError = computed(() => route.query['error'] === '1')
+const connectedGame = computed(() => {
+    return conStore.isGameConnected ? `${conStore.connectedGame!.name} connected` : 'No game connected'
+})
+
+const mode = useColorMode()
+mode.value = 'dark'
+
+socket.off()
+
+conStore.bindEvents()
+cpStore.bindEvents()
+replayStore.bindEvents()
+configStore.bindEvents()
+
 </script>
-
-<style lang="scss">
-
-</style>

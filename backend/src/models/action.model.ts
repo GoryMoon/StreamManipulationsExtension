@@ -20,8 +20,9 @@ const schema = new Schema<IAction, Model<IAction>>(
         action: { type: String, required: true },
         config: Schema.Types.Mixed,
     },
-    { timestamps: true }
+    { timestamps: true },
 )
 
 const action = model<IAction>('Action', schema)
-export { action as default, IAction }
+export { action as default }
+export type { IAction }

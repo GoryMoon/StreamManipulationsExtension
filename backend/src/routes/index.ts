@@ -1,11 +1,11 @@
-import { Application } from 'express'
+import { type Application } from 'express'
 import rateLimit from 'express-rate-limit'
-import { Server } from 'socket.io'
 import v1 from './v1'
 import v2 from './v2'
 import dashboard from './dashboard'
+import type { IoServer } from '../types'
 
-export default function (app: Application, io: Server) {
+export default function (app: Application, io: IoServer) {
     const apiLimiter = rateLimit({
         windowMs: 60 * 1000, // 1 minute
         max: 240, // 4 requests/sec

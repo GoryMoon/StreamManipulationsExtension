@@ -1,6 +1,6 @@
-import Ajv, { JSONSchemaType } from 'ajv'
-import { IConfigData } from './models/config.model'
-import {
+import Ajv, { type JSONSchemaType } from 'ajv'
+import type { IConfigData } from './models/config.model'
+import type {
     ISendActionRequest,
     IPostGameActionsRequest,
     ITransactionProduct,

@@ -59,7 +59,7 @@
     "authorName": "GoryMoon",
     "bitsEnabled": true,
     "canInstall": true,
-    "configUrl": "http://localhost:8081/config.html",
+    "configUrl": "https://localhost:3001/config.html",
     "configurationLocation": "hosted",
     "description": "Viewers can use bits to send pre-configured actions to the broadcasters game. \nThis extension supports multiple games, all supported ones can be found here https://github.com/GoryMoon/StreamManipulationsExtension/wiki/Games\n\nThis was originally made for Space Engineers, it has been updated to work with more games.\nSome examples of what you can do with Space Engineers are:\n* Send meteors onto the broadcasters base\n* Turn off their vehicle when they least expect it\n* Refill their energy in their ship when they are stranded in space.",
     "eulaTosUrl": "",
@@ -94,15 +94,15 @@
     "viewerSummary": "Allows viewers to send bits to trigger events in supported games",
     "viewerUrl": "",
     "viewerUrls": {
-      "mobile": "http://localhost:8081/mobile.html",
-      "component": "http://localhost:8081/component.html"
+      "mobile": "https://localhost:3001/mobile.html",
+      "component": "https://localhost:3001/component.html"
     },
     "views": {
       "mobile": {
-        "viewerUrl": "http://localhost:8081/mobile.html"
+        "viewerUrl": "https://localhost:3001/mobile.html"
       },
       "component": {
-        "viewerUrl": "http://localhost:8081/component.html",
+        "viewerUrl": "https://localhost:3001/component.html",
         "aspectWidth": 0,
         "aspectHeight": 0,
         "aspectRatioX": 900,
@@ -116,7 +116,7 @@
         "autoScale": true
       },
       "config": {
-        "viewerUrl": "http://localhost:8081/config.html",
+        "viewerUrl": "https://localhost:3001/config.html",
         "canLinkExternalContent": true
       }
     },
